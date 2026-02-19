@@ -8,7 +8,6 @@ on:
 
 env:
   DOTNET_NOLOGO: true
-  INCLUDE_SYMBOLS: true
 
 jobs:
   pr-checks:
@@ -149,8 +148,6 @@ jobs:
           --no-build
           --output ./artifacts
           /p:ContinuousIntegrationBuild=true
-          /p:IncludeSymbols=${{ env.INCLUDE_SYMBOLS }}
-          /p:SymbolPackageFormat=snupkg
 
       - name: Upload packages
         uses: actions/upload-artifact@v6
@@ -158,7 +155,6 @@ jobs:
           name: nuget-packages
           path: |
             ./artifacts/*.nupkg
-            ./artifacts/*.snupkg
 
       - name: Create git tag
         shell: bash
@@ -181,7 +177,6 @@ jobs:
           name: Release v${{ env.NBGV_NuGetPackageVersion }}
           files: |
             ./artifacts/*.nupkg
-            ./artifacts/*.snupkg
           generate_release_notes: true
 
       - name: Push to NuGet.org
