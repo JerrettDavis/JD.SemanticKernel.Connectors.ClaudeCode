@@ -32,25 +32,25 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <!-- All TFMs: shared plumbing pinned to versions compatible with SK 1.70.0 + MEAI 10.2.0 -->
+  <!-- All TFMs: shared plumbing pinned to versions compatible with SK 1.71.0 + MEAI 10.3.0 -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
   </ItemGroup>
 
   <!-- netstandard2.0 only: packages not pulled in transitively without SK/MEAI -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <!-- net8.0+: SK + Anthropic.SDK + MEAI -->
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
-    <PackageReference Include="Anthropic.SDK" Version="5.9.0" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="10.2.0" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" />
+    <PackageReference Include="Anthropic.SDK" />
+    <PackageReference Include="Microsoft.Extensions.AI" />
+    <PackageReference Include="Microsoft.SemanticKernel" />
   </ItemGroup>
 
 </Project>
