@@ -1,6 +1,10 @@
 # JD.SemanticKernel.Connectors.ClaudeCode
 
 [![NuGet](https://img.shields.io/nuget/v/JD.SemanticKernel.Connectors.ClaudeCode.svg)](https://www.nuget.org/packages/JD.SemanticKernel.Connectors.ClaudeCode)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/JD.SemanticKernel.Connectors.ClaudeCode.svg)](https://www.nuget.org/packages/JD.SemanticKernel.Connectors.ClaudeCode)
+[![CI](https://github.com/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode/actions/workflows/ci.yml/badge.svg)](https://github.com/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode/actions/workflows/codeql-analysis.yml)
+[![codecov](https://codecov.io/gh/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode/graph/badge.svg)](https://codecov.io/gh/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A **Semantic Kernel connector** that bridges your local [Claude Code](https://claude.ai/download) OAuth session into Microsoft Semantic Kernel — no manual API key management needed.
@@ -28,7 +32,7 @@ dotnet add package JD.SemanticKernel.Connectors.ClaudeCode
 using JD.SemanticKernel.Connectors.ClaudeCode;
 
 var builder = Kernel.CreateBuilder();
-builder.UseClaudeCodeChatCompletion();
+builder.UseClaudeCodeChatCompletion(); // defaults to ClaudeModels.Default (Sonnet)
 var kernel = builder.Build();
 
 var result = await kernel.InvokePromptAsync("Hello, Claude!");
@@ -72,20 +76,31 @@ builder.Services.AddClaudeCodeAuthentication(builder.Configuration);
 
 ## Sample CLI Tools
 
-This repo includes three proof-of-concept tools demonstrating agentic workflows with Semantic Kernel:
+This repo includes sample projects demonstrating agentic workflows with Semantic Kernel:
 
 | Tool | Command | Description |
 |------|---------|-------------|
 | **Gherkin Generator** | `jdgerkinator` | Converts acceptance criteria into Gherkin/Reqnroll specs |
 | **PR Review Agent** | `jdpr` | Multi-provider PR review (GitHub, Azure DevOps, GitLab) |
 | **Codebase Explorer** | `jdxplr` | Profiles codebases into structured knowledgebases |
+| **Todo Extractor** | *(library demo)* | Extracts structured todos from natural language |
 
-Install as global tools:
+Install the CLI tools as global tools:
 
 ```bash
 dotnet tool install -g JD.Tools.GherkinGenerator
 dotnet tool install -g JD.Tools.PullRequestReviewer
 dotnet tool install -g JD.Tools.CodebaseExplorer
+```
+
+## Models
+
+Well-known model constants are available via `ClaudeModels`:
+
+```csharp
+builder.UseClaudeCodeChatCompletion(ClaudeModels.Opus);   // claude-opus-4-6
+builder.UseClaudeCodeChatCompletion(ClaudeModels.Sonnet);  // claude-sonnet-4-6 (default)
+builder.UseClaudeCodeChatCompletion(ClaudeModels.Haiku);   // claude-haiku-4-5
 ```
 
 ## Documentation

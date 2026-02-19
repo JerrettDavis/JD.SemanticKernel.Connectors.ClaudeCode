@@ -39,14 +39,14 @@ back cleanly to standard API key auth when a `sk-ant-api*` key is supplied inste
 | [Service Collection Integration](articles/service-collection-integration.md) | DI/`IServiceCollection` registration |
 | [HTTP Client Factory](articles/http-client-factory.md) | Bring-your-own-provider scenarios |
 | [Configuration Reference](articles/configuration-reference.md) | All options, environment variables, JSON config |
-| [Sample Tools](samples/index.md) | Three CLI tools demonstrating agentic workflows |
+| [Sample Tools](samples/index.md) | Four sample projects demonstrating agentic workflows |
 | [API Reference](api/index.md) | Full generated API docs |
 
 ---
 
 ## Sample tools
 
-Three production-ready CLI tools built on this package demonstrate real-world
+Four sample projects built on this package demonstrate real-world
 agentic workflows:
 
 | Tool | Command | Description |
@@ -54,6 +54,7 @@ agentic workflows:
 | [Gherkin Generator](samples/gherkin-generator.md) | `jdgerkinator` | Acceptance criteria → `.feature` files |
 | [PR Review Agent](samples/pull-request-reviewer.md) | `jdpr` | AI code review for GitHub / ADO / GitLab |
 | [Codebase Explorer](samples/codebase-explorer.md) | `jdxplr` | Profile a codebase → markdown knowledgebase |
+| [Todo Extractor](samples/todo-extractor.md) | *(library demo)* | Extract structured todos from natural language |
 
 See the [Sample Tools](samples/index.md) overview for installation and
 architecture details.

@@ -28,12 +28,22 @@ Reads credentials via the full [resolution chain](credential-resolution.md). Def
 ### Custom model
 
 ```csharp
+using JD.SemanticKernel.Connectors.ClaudeCode;
+
 var kernel = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion("claude-opus-4-6")
+    .UseClaudeCodeChatCompletion(ClaudeModels.Opus)
     .Build();
 ```
 
-The `modelId` parameter is the first positional argument.
+The `modelId` parameter is the first positional argument. Well-known constants are available via
+`ClaudeModels`:
+
+| Constant | Model ID | Description |
+|---|---|---|
+| `ClaudeModels.Opus` | `claude-opus-4-6` | Most capable, 1M context |
+| `ClaudeModels.Sonnet` | `claude-sonnet-4-6` | Balanced (default) |
+| `ClaudeModels.Haiku` | `claude-haiku-4-5-20251001` | Fastest, lowest cost |
+| `ClaudeModels.Default` | `claude-sonnet-4-6` | Alias for `Sonnet` |
 
 ---
 
@@ -127,19 +137,8 @@ var result = await kernel.InvokePromptAsync("Summarise the Liskov Substitution P
 `UseClaudeCodeChatCompletion` returns `IKernelBuilder` so it chains naturally:
 
 ```csharp
-var kernel = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion("claude-sonnet-4-6", apiKey: myKey)
-    .Plugins.AddFromType<MyPlugin>()
-    ... // other builder calls
-    .Build();
-```
-
-Wait — `Plugins` is not an extension method that returns `IKernelBuilder`. Use separate
-statements for plugin registration:
-
-```csharp
 var builder = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion("claude-sonnet-4-6", apiKey: myKey);
+    .UseClaudeCodeChatCompletion(ClaudeModels.Sonnet, apiKey: myKey);
 
 builder.Plugins.AddFromType<MyPlugin>();
 

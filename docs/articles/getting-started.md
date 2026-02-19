@@ -52,13 +52,19 @@ var kernel = Kernel.CreateBuilder()
 
 ## Choose a specific model
 
+Use the `ClaudeModels` class for well-known model identifiers:
+
 ```csharp
+using JD.SemanticKernel.Connectors.ClaudeCode;
+
 var kernel = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion("claude-opus-4-6")
+    .UseClaudeCodeChatCompletion(ClaudeModels.Opus)
     .Build();
 ```
 
-The default model is `claude-sonnet-4-6`.
+Available constants: `ClaudeModels.Opus`, `ClaudeModels.Sonnet` (default), `ClaudeModels.Haiku`.
+
+The default model is `claude-sonnet-4-6` (`ClaudeModels.Default`).
 
 ---
 
