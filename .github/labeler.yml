@@ -1,0 +1,49 @@
+# Auto-labeling configuration for pull requests
+
+'area: core':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/JD.SemanticKernel.Connectors.ClaudeCode/**/*'
+
+'area: samples':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'samples/**/*'
+
+'area: gherkin-generator':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'samples/GherkinGenerator/**/*'
+
+'area: pr-reviewer':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'samples/PullRequestReviewer/**/*'
+
+'area: codebase-explorer':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'samples/CodebaseExplorer/**/*'
+
+'area: documentation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+
+'area: tests':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'tests/**/*'
+
+'area: ci/cd':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
+
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.csproj'
+      - 'Directory.Build.props'
+      - 'version.json'

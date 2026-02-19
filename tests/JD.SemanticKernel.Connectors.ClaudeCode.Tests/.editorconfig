@@ -1,0 +1,7 @@
+# Test project overrides — safety net for dotnet format
+# This ensures xUnit-required public visibility is never overridden
+# even when dotnet format processes multi-TFM builds independently.
+[*.cs]
+dotnet_diagnostic.CA1515.severity = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1812.severity = none
