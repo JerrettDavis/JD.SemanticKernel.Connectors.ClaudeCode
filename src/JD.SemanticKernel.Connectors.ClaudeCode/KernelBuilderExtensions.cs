@@ -23,7 +23,8 @@ public static class KernelBuilderExtensions
     /// </summary>
     /// <param name="builder">The kernel builder to configure.</param>
     /// <param name="modelId">
-    /// The Claude model to target. Defaults to <c>claude-sonnet-4-6</c>.
+    /// The Claude model to target. Defaults to <see cref="ClaudeModels.Default"/>
+    /// (<c>claude-sonnet-4-6</c>). See <see cref="ClaudeModels"/> for well-known identifiers.
     /// </param>
     /// <param name="apiKey">
     /// Optional explicit API key or OAuth token override.  When supplied, credential file
@@ -55,7 +56,7 @@ public static class KernelBuilderExtensions
     /// </example>
     public static IKernelBuilder UseClaudeCodeChatCompletion(
         this IKernelBuilder builder,
-        string modelId = "claude-sonnet-4-6",
+        string modelId = ClaudeModels.Default,
         string? apiKey = null,
         Action<ClaudeCodeSessionOptions>? configure = null)
     {
@@ -73,6 +74,7 @@ public static class KernelBuilderExtensions
         var anthropicClient = new AnthropicClient("placeholder-cleared-by-handler", httpClient);
 
         var chatClient = new ChatClientBuilder(anthropicClient.Messages)
+            .ConfigureOptions(o => o.ModelId ??= modelId)
             .UseFunctionInvocation()
             .Build();
 

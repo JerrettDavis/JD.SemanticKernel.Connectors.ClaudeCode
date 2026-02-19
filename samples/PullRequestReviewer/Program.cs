@@ -64,7 +64,7 @@ var urlOption = new Option<string>("--url")
 var modelOption = new Option<string>("--model", "-m")
 {
     Description = "Claude model to use",
-    DefaultValueFactory = _ => "claude-sonnet-4-6"
+    DefaultValueFactory = _ => ClaudeModels.Default
 };
 
 var rootCommand = new RootCommand("AI-powered pull request review agent supporting GitHub, Azure DevOps, and GitLab")
