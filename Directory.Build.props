@@ -35,7 +35,7 @@
 
   <!-- Analyzers — enforce code quality across all projects -->
   <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.187" PrivateAssets="all" />
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.302" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
