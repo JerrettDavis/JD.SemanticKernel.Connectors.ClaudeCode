@@ -34,7 +34,7 @@ var outputOption = new Option<DirectoryInfo>("--output", "-o")
 var modelOption = new Option<string>("--model", "-m")
 {
     Description = "Claude model to use",
-    DefaultValueFactory = _ => "claude-sonnet-4-6"
+    DefaultValueFactory = _ => ClaudeModels.Default
 };
 
 var inputOption = new Option<FileInfo?>("--input", "-i")
