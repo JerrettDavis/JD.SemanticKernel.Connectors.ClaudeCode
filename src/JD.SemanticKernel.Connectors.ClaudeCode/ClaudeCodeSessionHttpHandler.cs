@@ -54,14 +54,18 @@ public sealed class ClaudeCodeSessionHttpHandler : DelegatingHandler
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
+        if (request.RequestUri is null)
+            throw new InvalidOperationException(
+                "Request URI must not be null when using Claude Code authentication.");
+
         if (!string.Equals(
-                request.RequestUri?.Scheme,
+                request.RequestUri.Scheme,
                 Uri.UriSchemeHttps, StringComparison.Ordinal)
             && !string.Equals(
-                request.RequestUri?.Host,
+                request.RequestUri.Host,
                 "localhost", StringComparison.Ordinal)
             && !string.Equals(
-                request.RequestUri?.Host,
+                request.RequestUri.Host,
                 "127.0.0.1", StringComparison.Ordinal))
             throw new InvalidOperationException(
                 "Only HTTPS requests are allowed when using " +

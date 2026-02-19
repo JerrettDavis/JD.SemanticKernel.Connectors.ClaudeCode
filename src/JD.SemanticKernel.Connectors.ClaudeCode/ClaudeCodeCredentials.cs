@@ -40,6 +40,6 @@ public sealed record ClaudeCodeOAuthCredentials
     /// <summary>The expiry time as a <see cref="DateTimeOffset"/>.</summary>
     public DateTimeOffset ExpiresAtUtc => DateTimeOffset.FromUnixTimeMilliseconds(ExpiresAt);
 
-    /// <summary><see langword="true"/> if the token has passed its expiry time.</summary>
-    public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAtUtc;
+    /// <summary><see langword="true"/> if the token has passed its expiry time (with a 30-second safety margin for clock skew).</summary>
+    public bool IsExpired => DateTimeOffset.UtcNow.AddSeconds(30) >= ExpiresAtUtc;
 }

@@ -141,4 +141,22 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     return 0;
 });
 
-return await rootCommand.Parse(args).InvokeAsync();
+try
+{
+    return await rootCommand.Parse(args).InvokeAsync();
+}
+catch (ClaudeCodeSessionException ex)
+{
+    Console.Error.WriteLine($"Authentication error: {ex.Message}");
+    return 1;
+}
+catch (HttpRequestException ex)
+{
+    Console.Error.WriteLine($"Network error: {ex.Message}");
+    return 1;
+}
+catch (OperationCanceledException)
+{
+    Console.Error.WriteLine("Operation cancelled.");
+    return 130;
+}

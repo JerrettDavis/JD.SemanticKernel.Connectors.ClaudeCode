@@ -159,7 +159,8 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     var builder = Kernel.CreateBuilder();
     builder.UseClaudeCodeChatCompletion(model);
     builder.Plugins.AddFromObject(codeReviewPlugin, "Review");
-    builder.Plugins.AddFromObject(new GitPlugin(), "Git");
+    using var gitPlugin = new GitPlugin();
+    builder.Plugins.AddFromObject(gitPlugin, "Git");
 
     var kernel = builder.Build();
     var chat = kernel.GetRequiredService<IChatCompletionService>();
@@ -239,4 +240,22 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     return 0;
 });
 
-return await rootCommand.Parse(args).InvokeAsync();
+try
+{
+    return await rootCommand.Parse(args).InvokeAsync();
+}
+catch (ClaudeCodeSessionException ex)
+{
+    Console.Error.WriteLine($"Authentication error: {ex.Message}");
+    return 1;
+}
+catch (HttpRequestException ex)
+{
+    Console.Error.WriteLine($"Network error: {ex.Message}");
+    return 1;
+}
+catch (OperationCanceledException)
+{
+    Console.Error.WriteLine("Operation cancelled.");
+    return 130;
+}

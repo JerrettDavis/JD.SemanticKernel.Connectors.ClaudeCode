@@ -9,13 +9,15 @@ namespace PullRequestReviewer.Plugins;
 /// Semantic Kernel plugin for Git operations — clone, diff, branch comparison.
 /// Shells out to the local git CLI using ArgumentList for injection safety.
 /// </summary>
-public sealed class GitPlugin
+public sealed class GitPlugin : IDisposable
 {
     private static readonly char[] s_shellMeta =
         [';', '&', '|', '$', '`', '\n', '\r', '<', '>'];
 
+    private readonly List<string> _tempDirs = [];
+
     [KernelFunction("clone_repository")]
-    [Description("Clones a git repository to a local temporary directory.")]
+    [Description("Clones a git repository to a local temporary directory. The cloned directory is automatically cleaned up when the plugin is disposed.")]
     public async Task<string> CloneRepositoryAsync(
         [Description("The repository clone URL")] string cloneUrl,
         [Description("Optional target directory path.")] string? targetDir = null,
@@ -27,11 +29,23 @@ public sealed class GitPlugin
                 "pr-review-" + Guid.NewGuid().ToString("N")[..8]);
         Directory.CreateDirectory(dir);
 
-        var result = await RunGitAsync(
-            dir, ct, "clone", "--depth", "50", cloneUrl, ".");
-        return result.ExitCode == 0
-            ? $"Repository cloned to: {dir}"
-            : $"Error cloning: {result.Output}";
+        try
+        {
+            var result = await RunGitAsync(
+                dir, ct, "clone", "--depth", "50", cloneUrl, ".");
+            if (result.ExitCode == 0)
+            {
+                _tempDirs.Add(dir);
+                return $"Repository cloned to: {dir}";
+            }
+
+            return $"Error cloning: {result.Output}";
+        }
+        catch
+        {
+            TryDeleteDirectory(dir);
+            throw;
+        }
     }
 
     [KernelFunction("get_branch_diff")]
@@ -140,5 +154,21 @@ public sealed class GitPlugin
         await process.WaitForExitAsync(ct);
 
         return (process.ExitCode, output.ToString());
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        foreach (var dir in _tempDirs)
+            TryDeleteDirectory(dir);
+
+        _tempDirs.Clear();
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try { Directory.Delete(path, recursive: true); }
+        catch (IOException) { /* best-effort cleanup */ }
+        catch (UnauthorizedAccessException) { /* best-effort cleanup */ }
     }
 }

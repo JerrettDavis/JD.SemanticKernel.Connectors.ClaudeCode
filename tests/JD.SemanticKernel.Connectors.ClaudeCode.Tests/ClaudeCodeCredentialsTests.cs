@@ -21,6 +21,18 @@ public sealed class ClaudeCodeCredentialsTests
     }
 
     [Fact]
+    public void IsExpired_ReturnsTrue_WhenExpiresAtWithinClockSkewMargin()
+    {
+        // Token expires in 10 seconds — within the 30-second safety margin.
+        var creds = new ClaudeCodeOAuthCredentials
+        {
+            ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(10).ToUnixTimeMilliseconds()
+        };
+
+        Assert.True(creds.IsExpired);
+    }
+
+    [Fact]
     public void IsExpired_ReturnsTrue_WhenExpiresAtInPast()
     {
         var creds = new ClaudeCodeOAuthCredentials

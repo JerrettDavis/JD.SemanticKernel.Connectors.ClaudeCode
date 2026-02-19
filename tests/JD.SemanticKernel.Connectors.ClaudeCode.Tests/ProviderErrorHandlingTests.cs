@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
@@ -38,7 +37,7 @@ public sealed class ProviderErrorHandlingTests : IDisposable
     }
 
     [Fact]
-    public async Task GetTokenAsync_MalformedJson_ThrowsJsonException()
+    public async Task GetTokenAsync_MalformedJson_ThrowsSessionException()
     {
         var path = Path.GetTempFileName();
         try
@@ -46,7 +45,8 @@ public sealed class ProviderErrorHandlingTests : IDisposable
             await File.WriteAllTextAsync(path, "{ not valid json!!!");
             var provider = Build(o => o.CredentialsPath = path);
 
-            await Assert.ThrowsAsync<JsonException>(
+            // Malformed JSON is now caught and treated as missing credentials.
+            await Assert.ThrowsAsync<ClaudeCodeSessionException>(
                 () => provider.GetTokenAsync());
         }
         finally
@@ -92,9 +92,8 @@ public sealed class ProviderErrorHandlingTests : IDisposable
     }
 
     [Fact]
-    public async Task GetTokenAsync_EmptyAccessToken_ReturnsEmptyString()
+    public async Task GetTokenAsync_EmptyAccessToken_ThrowsSessionException()
     {
-        // Current behavior: empty access token is returned (no validation on token content)
         var futureMs = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeMilliseconds();
         var json = $$"""
             {
@@ -111,8 +110,10 @@ public sealed class ProviderErrorHandlingTests : IDisposable
             await File.WriteAllTextAsync(path, json);
             var provider = Build(o => o.CredentialsPath = path);
 
-            var token = await provider.GetTokenAsync();
-            Assert.Equal(string.Empty, token);
+            var ex = await Assert.ThrowsAsync<ClaudeCodeSessionException>(
+                () => provider.GetTokenAsync());
+
+            Assert.Contains("empty", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
         finally
         {
@@ -174,7 +175,7 @@ public sealed class ProviderErrorHandlingTests : IDisposable
     }
 
     [Fact]
-    public async Task GetCredentialsAsync_MalformedJson_ThrowsJsonException()
+    public async Task GetCredentialsAsync_MalformedJson_ReturnsNull()
     {
         var path = Path.GetTempFileName();
         try
@@ -182,8 +183,9 @@ public sealed class ProviderErrorHandlingTests : IDisposable
             await File.WriteAllTextAsync(path, "not json");
             var provider = Build(o => o.CredentialsPath = path);
 
-            await Assert.ThrowsAsync<JsonException>(
-                () => provider.GetCredentialsAsync());
+            // Malformed JSON is now caught and returns null.
+            var creds = await provider.GetCredentialsAsync();
+            Assert.Null(creds);
         }
         finally
         {

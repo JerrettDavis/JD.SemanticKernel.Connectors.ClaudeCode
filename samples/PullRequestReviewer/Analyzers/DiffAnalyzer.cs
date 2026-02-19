@@ -23,7 +23,7 @@ public sealed class DiffAnalyzer : IAnalyzer
         foreach (var file in files)
         {
             // Flag large diffs
-            var diffLines = file.Diff.Split('\n').Length;
+            var diffLines = file.Diff.Split(['\n', '\r']).Length;
             if (diffLines > LargeFileDiffThreshold)
             {
                 findings.Add(new AnalyzerFinding(

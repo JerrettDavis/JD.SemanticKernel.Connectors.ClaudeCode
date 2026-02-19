@@ -113,6 +113,11 @@ public sealed class ClaudeCodeSessionProvider : IDisposable
                 $"Claude session expired at {creds.ExpiresAtUtc:yyyy-MM-dd HH:mm} UTC. " +
                 "Run 'claude login' to refresh your session.");
 
+        if (string.IsNullOrWhiteSpace(creds.AccessToken))
+            throw new ClaudeCodeSessionException(
+                "Claude credentials file is present but the access token is empty. " +
+                "Run 'claude login' to obtain a new token.");
+
         _logger.LogInformation(
             "Extracted Claude session token (expires {ExpiresAt}, subscription: {Sub}, tier: {Tier})",
             creds.ExpiresAtUtc,
@@ -154,6 +159,24 @@ public sealed class ClaudeCodeSessionProvider : IDisposable
         {
             _logger.LogDebug(
                 "Credentials directory not found for {Path}", path);
+            return null;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex,
+                "Permission denied reading credentials at {Path}", path);
+            return null;
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(ex,
+                "I/O error reading credentials at {Path}", path);
+            return null;
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex,
+                "Malformed JSON in credentials file at {Path}", path);
             return null;
         }
     }

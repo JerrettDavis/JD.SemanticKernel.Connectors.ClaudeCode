@@ -65,13 +65,27 @@ history.AddUserMessage(messages);
 
 Console.WriteLine("🔍 Extracting todos from standup notes...\n");
 
-var settings = new OpenAIPromptExecutionSettings();
-var response = await chat.GetChatMessageContentAsync(
-    history, settings, kernel);
+try
+{
+    var settings = new OpenAIPromptExecutionSettings();
+    var response = await chat.GetChatMessageContentAsync(
+        history, settings, kernel);
 
-Console.WriteLine("─────────────────────────────────────────────");
-Console.WriteLine("EXTRACTED TODOS");
-Console.WriteLine("─────────────────────────────────────────────");
-Console.WriteLine(response.Content);
-Console.WriteLine();
-Console.WriteLine("✅ Done");
+    Console.WriteLine("─────────────────────────────────────────────");
+    Console.WriteLine("EXTRACTED TODOS");
+    Console.WriteLine("─────────────────────────────────────────────");
+    Console.WriteLine(response.Content);
+    Console.WriteLine();
+    Console.WriteLine("✅ Done");
+    return 0;
+}
+catch (ClaudeCodeSessionException ex)
+{
+    Console.Error.WriteLine($"Authentication error: {ex.Message}");
+    return 1;
+}
+catch (HttpRequestException ex)
+{
+    Console.Error.WriteLine($"Network error: {ex.Message}");
+    return 1;
+}
