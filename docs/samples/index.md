@@ -14,6 +14,7 @@ and follows the same core architecture.
 | [Gherkin Generator](gherkin-generator.md) | `jdgerkinator` | Converts acceptance criteria into Gherkin `.feature` files |
 | [PR Review Agent](pull-request-reviewer.md) | `jdpr` | AI-powered pull request review for GitHub, Azure DevOps, and GitLab |
 | [Codebase Explorer](codebase-explorer.md) | `jdxplr` | Profiles a codebase and generates markdown knowledgebase documentation |
+| [Todo Extractor](todo-extractor.md) | *(library demo)* | Extracts structured todos from natural language using the library directly |
 
 ---
 
@@ -74,8 +75,8 @@ Every sample follows the same pattern:
 ## Building from source
 
 ```shell
-git clone https://github.com/JerrettDavis/ClaudeCodeAuthenticationProvider.git
-cd ClaudeCodeAuthenticationProvider
+git clone https://github.com/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode.git
+cd JD.SemanticKernel.Connectors.ClaudeCode
 
 # Build all projects
 dotnet build
@@ -84,6 +85,9 @@ dotnet build
 dotnet run --project samples/GherkinGenerator --framework net8.0 -- --help
 dotnet run --project samples/PullRequestReviewer --framework net8.0 -- --help
 dotnet run --project samples/CodebaseExplorer --framework net8.0 -- --help
+
+# Run the TodoExtractor demo
+dotnet run --project samples/TodoExtractor --framework net8.0
 
 # Pack as tools
 dotnet pack
@@ -98,7 +102,7 @@ The `version.json` at the repository root controls the version for every package
 
 ```json
 {
-  "version": "1.0-preview",
+  "version": "0.1",
   "publicReleaseRefSpec": [
     "^refs/heads/main$",
     "^refs/tags/v\\d+\\.\\d+"

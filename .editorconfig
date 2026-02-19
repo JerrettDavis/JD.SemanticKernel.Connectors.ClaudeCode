@@ -255,6 +255,7 @@ dotnet_naming_rule.async_methods_should_end_with_async.severity = none
 # ─── Sample project overrides ──────────────────────────────────
 [samples/**/*.cs]
 dotnet_diagnostic.CA1056.severity = none
+dotnet_diagnostic.CA1303.severity = none
 dotnet_diagnostic.CA1305.severity = none
 dotnet_diagnostic.CA1308.severity = none
 dotnet_diagnostic.CA1515.severity = none
