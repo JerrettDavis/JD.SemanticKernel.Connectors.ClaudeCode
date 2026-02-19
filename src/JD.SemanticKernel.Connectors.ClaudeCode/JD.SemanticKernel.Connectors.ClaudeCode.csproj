@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
+    <PackageId>JD.SemanticKernel.Connectors.ClaudeCode</PackageId>
+    <Description>
+      Claude Code session connector for Semantic Kernel. Provides UseClaudeCodeChatCompletion()
+      to wire local Claude Code OAuth credentials (or an explicit API key) into any Semantic Kernel
+      application without managing tokens manually.
+    </Description>
+    <PackageTags>semantic-kernel;connectors;anthropic;claude;claude-code;authentication;ai;oauth</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- NuGet package metadata -->
+    <Authors>JD</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jdonaldson/ClaudeCodeAuthenticationProvider</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jdonaldson/ClaudeCodeAuthenticationProvider</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>JD.SemanticKernel.Connectors.ClaudeCode.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!-- All TFMs: shared plumbing pinned to versions compatible with SK 1.70.0 + MEAI 10.2.0 -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.2" />
+  </ItemGroup>
+
+  <!-- netstandard2.0 only: packages not pulled in transitively without SK/MEAI -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <!-- net8.0+: SK + Anthropic.SDK + MEAI -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+    <PackageReference Include="Anthropic.SDK" Version="5.9.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.2.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>GherkinGenerator</RootNamespace>
+
+    <!-- dotnet tool packaging -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>jdgerkinator</ToolCommandName>
+    <PackageId>JD.Tools.GherkinGenerator</PackageId>
+    <Description>AI-powered Acceptance Criteria to Gherkin feature file generator. Optionally scans assemblies for existing Reqnroll/SpecFlow step definitions.</Description>
+    <PackageTags>gherkin;bdd;reqnroll;specflow;acceptance-criteria;semantic-kernel;claude;ai;dotnet-tool</PackageTags>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.2.0" />
+    <PackageReference Include="Anthropic.SDK" Version="5.9.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.3" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\JD.SemanticKernel.Connectors.ClaudeCode\JD.SemanticKernel.Connectors.ClaudeCode.csproj" />
+  </ItemGroup>
+
+</Project>

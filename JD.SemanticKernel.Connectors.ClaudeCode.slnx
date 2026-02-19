@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/JD.SemanticKernel.Connectors.ClaudeCode/JD.SemanticKernel.Connectors.ClaudeCode.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/JD.SemanticKernel.Connectors.ClaudeCode.Tests/JD.SemanticKernel.Connectors.ClaudeCode.Tests.csproj" />
+    <Project Path="tests/GherkinGenerator.Tests/GherkinGenerator.Tests.csproj" />
+    <Project Path="tests/PullRequestReviewer.Tests/PullRequestReviewer.Tests.csproj" />
+    <Project Path="tests/CodebaseExplorer.Tests/CodebaseExplorer.Tests.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/GherkinGenerator/GherkinGenerator.csproj" />
+    <Project Path="samples/PullRequestReviewer/PullRequestReviewer.csproj" />
+    <Project Path="samples/CodebaseExplorer/CodebaseExplorer.csproj" />
+  </Folder>
+</Solution>

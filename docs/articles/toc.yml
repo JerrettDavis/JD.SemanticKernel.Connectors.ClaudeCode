@@ -1,0 +1,12 @@
+- name: Getting Started
+  href: getting-started.md
+- name: Credential Resolution
+  href: credential-resolution.md
+- name: Kernel Builder Integration
+  href: kernel-builder-integration.md
+- name: Service Collection Integration
+  href: service-collection-integration.md
+- name: HTTP Client Factory
+  href: http-client-factory.md
+- name: Configuration Reference
+  href: configuration-reference.md

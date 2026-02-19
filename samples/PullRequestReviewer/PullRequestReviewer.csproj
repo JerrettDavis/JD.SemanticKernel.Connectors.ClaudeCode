@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>PullRequestReviewer</RootNamespace>
+
+    <!-- dotnet tool packaging -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>jdpr</ToolCommandName>
+    <PackageId>JD.Tools.PullRequestReviewer</PackageId>
+    <Description>AI-powered pull request review agent with extensible provider architecture supporting GitHub, Azure DevOps, and GitLab.</Description>
+    <PackageTags>pull-request;code-review;github;azure-devops;gitlab;semantic-kernel;claude;ai;dotnet-tool</PackageTags>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.2.0" />
+    <PackageReference Include="Anthropic.SDK" Version="5.9.0" />
+    <PackageReference Include="Octokit" Version="14.0.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\JD.SemanticKernel.Connectors.ClaudeCode\JD.SemanticKernel.Connectors.ClaudeCode.csproj" />
+  </ItemGroup>
+
+</Project>
