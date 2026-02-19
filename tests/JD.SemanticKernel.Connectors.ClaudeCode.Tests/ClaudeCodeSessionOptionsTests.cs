@@ -19,6 +19,7 @@ public sealed class ClaudeCodeSessionOptionsTests
         Assert.Null(options.ApiKey);
         Assert.Null(options.OAuthToken);
         Assert.Null(options.CredentialsPath);
+        Assert.False(options.DangerouslyDisableSslValidation);
     }
 
     [Fact]
@@ -28,11 +29,13 @@ public sealed class ClaudeCodeSessionOptionsTests
         {
             ApiKey = "sk-ant-api-test",
             OAuthToken = "sk-ant-oat-test",
-            CredentialsPath = "/custom/path"
+            CredentialsPath = "/custom/path",
+            DangerouslyDisableSslValidation = true
         };
 
         Assert.Equal("sk-ant-api-test", options.ApiKey);
         Assert.Equal("sk-ant-oat-test", options.OAuthToken);
         Assert.Equal("/custom/path", options.CredentialsPath);
+        Assert.True(options.DangerouslyDisableSslValidation);
     }
 }

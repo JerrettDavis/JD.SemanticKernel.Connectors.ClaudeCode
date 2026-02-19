@@ -306,6 +306,38 @@ public sealed class KnowledgeBaseWriterPluginTests : IDisposable
     }
 
     [Fact]
+    public void WriteDocument_NullContent_ReturnsErrorMessage()
+    {
+        var plugin = new KnowledgeBaseWriterPlugin(_tempDir);
+        var result = plugin.WriteDocument("README.md", null);
+
+        Assert.Contains("'content' argument is required", result);
+        Assert.False(File.Exists(
+            Path.Combine(_tempDir, "README.md")));
+    }
+
+    [Fact]
+    public void WriteDocument_EmptyContent_ReturnsErrorMessage()
+    {
+        var plugin = new KnowledgeBaseWriterPlugin(_tempDir);
+        var result = plugin.WriteDocument("README.md", "   ");
+
+        Assert.Contains("'content' argument is required", result);
+    }
+
+    [Fact]
+    public void AppendToDocument_NullContent_ReturnsErrorMessage()
+    {
+        var plugin = new KnowledgeBaseWriterPlugin(_tempDir);
+        File.WriteAllText(
+            Path.Combine(_tempDir, "doc.md"), "# Header\n");
+
+        var result = plugin.AppendToDocument("doc.md", null);
+
+        Assert.Contains("'content' argument is required", result);
+    }
+
+    [Fact]
     public void WriteDocument_BlocksPathTraversal()
     {
         var plugin = new KnowledgeBaseWriterPlugin(_tempDir);

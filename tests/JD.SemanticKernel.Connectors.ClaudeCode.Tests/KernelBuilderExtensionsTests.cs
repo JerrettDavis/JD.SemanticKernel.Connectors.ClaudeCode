@@ -67,4 +67,16 @@ public sealed class KernelBuilderExtensionsTests
         var returned = builder.UseClaudeCodeChatCompletion(apiKey: "sk-ant-api-test");
         Assert.Same(builder, returned);
     }
+
+    [Fact]
+    public void UseClaudeCodeChatCompletion_WithInsecureSsl_RegistersService()
+    {
+        var kernel = Kernel.CreateBuilder()
+            .UseClaudeCodeChatCompletion(
+                apiKey: "sk-ant-api-test",
+                configure: o => o.DangerouslyDisableSslValidation = true)
+            .Build();
+
+        Assert.NotNull(kernel.Services.GetService<IChatCompletionService>());
+    }
 }

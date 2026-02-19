@@ -17,8 +17,12 @@ public sealed class KnowledgeBaseWriterPlugin(string allowedOutputDir)
     [Description("Writes a markdown document to the knowledgebase output directory.")]
     public string WriteDocument(
         [Description("File name (e.g. 'README.md')")] string fileName,
-        [Description("Full markdown content to write")] string content)
+        [Description("Full markdown content to write")] string? content = null)
     {
+        if (string.IsNullOrWhiteSpace(content))
+            return "Error: the 'content' argument is required and must not be empty. " +
+                   "Please provide the full markdown content to write and call this function again.";
+
         try
         {
             var fullPath = ResolveSafePath(fileName);
@@ -36,8 +40,12 @@ public sealed class KnowledgeBaseWriterPlugin(string allowedOutputDir)
     [Description("Appends content to an existing knowledgebase document.")]
     public string AppendToDocument(
         [Description("Relative path to the markdown file")] string filePath,
-        [Description("Content to append")] string content)
+        [Description("Content to append")] string? content = null)
     {
+        if (string.IsNullOrWhiteSpace(content))
+            return "Error: the 'content' argument is required and must not be empty. " +
+                   "Please provide the content to append and call this function again.";
+
         try
         {
             var fullPath = ResolveSafePath(filePath);

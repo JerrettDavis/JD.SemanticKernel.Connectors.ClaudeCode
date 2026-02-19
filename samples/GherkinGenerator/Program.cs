@@ -42,13 +42,19 @@ var inputOption = new Option<FileInfo?>("--input", "-i")
     Description = "File containing acceptance criteria (reads from stdin if omitted)"
 };
 
+var insecureOption = new Option<bool>("--insecure")
+{
+    Description = "Disable SSL/TLS certificate validation (for enterprise proxies with self-signed certificates)"
+};
+
 var rootCommand = new RootCommand("AI-powered Acceptance Criteria to Gherkin feature file generator")
 {
     assemblyOption,
     featuresOption,
     outputOption,
     modelOption,
-    inputOption
+    inputOption,
+    insecureOption
 };
 
 rootCommand.SetAction(async (parseResult, cancellationToken) =>
@@ -58,6 +64,7 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     var outputDir = parseResult.GetValue(outputOption)!;
     var model = parseResult.GetValue(modelOption)!;
     var inputFile = parseResult.GetValue(inputOption);
+    var insecure = parseResult.GetValue(insecureOption);
 
     Console.WriteLine("╔═══════════════════════════════════════════════════════════╗");
     Console.WriteLine("║    jdgerkinator — AC → Gherkin Feature Files             ║");
@@ -66,7 +73,9 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     Console.WriteLine();
 
     var builder = Kernel.CreateBuilder();
-    builder.UseClaudeCodeChatCompletion(model);
+    builder.UseClaudeCodeChatCompletion(model, configure: insecure
+        ? o => o.DangerouslyDisableSslValidation = true
+        : null);
     builder.Plugins.AddFromObject(new StepDefinitionScannerPlugin(), "StepScanner");
     builder.Plugins.AddFromObject(new FeatureFilePlugin(), "Features");
     builder.Plugins.AddFromObject(new GherkinWriterPlugin(outputDir.FullName), "GherkinWriter");

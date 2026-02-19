@@ -67,6 +67,11 @@ var modelOption = new Option<string>("--model", "-m")
     DefaultValueFactory = _ => ClaudeModels.Default
 };
 
+var insecureOption = new Option<bool>("--insecure")
+{
+    Description = "Disable SSL/TLS certificate validation (for enterprise proxies with self-signed certificates)"
+};
+
 var rootCommand = new RootCommand("AI-powered pull request review agent supporting GitHub, Azure DevOps, and GitLab")
 {
     providerOption,
@@ -76,7 +81,8 @@ var rootCommand = new RootCommand("AI-powered pull request review agent supporti
     tokenOption,
     orgOption,
     urlOption,
-    modelOption
+    modelOption,
+    insecureOption
 };
 
 rootCommand.SetAction(async (parseResult, cancellationToken) =>
@@ -89,6 +95,7 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     var orgUrl = parseResult.GetValue(orgOption);
     var gitlabUrl = parseResult.GetValue(urlOption)!;
     var model = parseResult.GetValue(modelOption)!;
+    var insecure = parseResult.GetValue(insecureOption);
 
     Console.WriteLine("╔═══════════════════════════════════════════════════════════╗");
     Console.WriteLine("║          jdpr — AI Code Review Agent                     ║");
@@ -157,7 +164,9 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     codeReviewPlugin.AddAnalyzerResults(analyzerResults);
 
     var builder = Kernel.CreateBuilder();
-    builder.UseClaudeCodeChatCompletion(model);
+    builder.UseClaudeCodeChatCompletion(model, configure: insecure
+        ? o => o.DangerouslyDisableSslValidation = true
+        : null);
     builder.Plugins.AddFromObject(codeReviewPlugin, "Review");
     using var gitPlugin = new GitPlugin();
     builder.Plugins.AddFromObject(gitPlugin, "Git");

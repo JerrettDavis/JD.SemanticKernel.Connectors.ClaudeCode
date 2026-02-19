@@ -38,12 +38,18 @@ var depthOption = new Option<int>("--depth", "-d")
     DefaultValueFactory = _ => 3
 };
 
+var insecureOption = new Option<bool>("--insecure")
+{
+    Description = "Disable SSL/TLS certificate validation (for enterprise proxies with self-signed certificates)"
+};
+
 var rootCommand = new RootCommand("AI-powered codebase profiler that generates structured knowledgebases as markdown documentation")
 {
     pathArgument,
     outputOption,
     modelOption,
-    depthOption
+    depthOption,
+    insecureOption
 };
 
 rootCommand.SetAction(async (parseResult, cancellationToken) =>
@@ -52,6 +58,7 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     var outputDir = parseResult.GetValue(outputOption);
     var model = parseResult.GetValue(modelOption)!;
     var depth = parseResult.GetValue(depthOption);
+    var insecure = parseResult.GetValue(insecureOption);
 
     var codebasePath = codebaseDir.FullName;
     if (!codebaseDir.Exists)
@@ -72,10 +79,12 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     Console.WriteLine();
 
     var builder = Kernel.CreateBuilder();
-    builder.UseClaudeCodeChatCompletion(model);
+    builder.UseClaudeCodeChatCompletion(model, configure: insecure
+        ? o => o.DangerouslyDisableSslValidation = true
+        : null);
     builder.Plugins.AddFromObject(new FileSystemPlugin(codebasePath), "FileSystem");
     builder.Plugins.AddFromObject(new CodeAnalysisPlugin(), "CodeAnalysis");
-    builder.Plugins.AddFromObject(new KnowledgeBaseWriterPlugin(outputDir?.FullName ?? Path.Combine(codebasePath, "knowledgebase")), "KnowledgeBase");
+    builder.Plugins.AddFromObject(new KnowledgeBaseWriterPlugin(outputPath), "KnowledgeBase");
 
     var kernel = builder.Build();
     var chat = kernel.GetRequiredService<IChatCompletionService>();

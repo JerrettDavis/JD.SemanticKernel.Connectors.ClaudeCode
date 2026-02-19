@@ -27,4 +27,15 @@ public sealed class ClaudeCodeSessionOptions
     /// Useful for CI/CD environments where the token is injected as a secret.
     /// </summary>
     public string? OAuthToken { get; set; }
+
+    /// <summary>
+    /// When <see langword="true"/>, disables SSL/TLS certificate validation on outgoing HTTP
+    /// requests.  This is intended <b>only</b> for enterprise environments behind TLS-intercepting
+    /// proxies or self-signed certificates.
+    /// <para>
+    /// <b>Warning:</b> enabling this option exposes all traffic to potential
+    /// man-in-the-middle attacks.  Do not enable in production.
+    /// </para>
+    /// </summary>
+    public bool DangerouslyDisableSslValidation { get; set; }
 }

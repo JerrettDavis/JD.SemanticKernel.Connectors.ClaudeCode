@@ -48,4 +48,24 @@ public sealed class ClaudeCodeHttpClientFactoryTests
         Assert.Throws<ArgumentNullException>(() =>
             ClaudeCodeHttpClientFactory.Create((ClaudeCodeSessionProvider)null!));
     }
+
+    [Fact]
+    public void Create_WithInsecureSsl_ReturnsHttpClient()
+    {
+        using var client = ClaudeCodeHttpClientFactory.Create(
+            o =>
+            {
+                o.ApiKey = "sk-ant-api-test";
+                o.DangerouslyDisableSslValidation = true;
+            });
+        Assert.NotNull(client);
+    }
+
+    [Fact]
+    public void Create_WithProviderAndInsecureSsl_ReturnsHttpClient()
+    {
+        var provider = SessionProviderFactory.WithApiKey("sk-ant-api-test");
+        using var client = ClaudeCodeHttpClientFactory.Create(provider, dangerouslyDisableSslValidation: true);
+        Assert.NotNull(client);
+    }
 }

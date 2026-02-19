@@ -37,12 +37,15 @@ Console.WriteLine("║    Powered by Semantic Kernel + Claude Code Auth         
 Console.WriteLine("╚═══════════════════════════════════════════════════════════╝");
 Console.WriteLine();
 
-var model = args.Length > 0 ? args[0] : ClaudeModels.Default;
+var insecure = args.Contains("--insecure", StringComparer.OrdinalIgnoreCase);
+var model = args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ClaudeModels.Default;
 Console.WriteLine($"📋 Model: {model}");
 Console.WriteLine();
 
 var kernel = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion(model)
+    .UseClaudeCodeChatCompletion(model, configure: insecure
+        ? o => o.DangerouslyDisableSslValidation = true
+        : null)
     .Build();
 
 var chat = kernel.GetRequiredService<IChatCompletionService>();

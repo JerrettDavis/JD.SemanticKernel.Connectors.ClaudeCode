@@ -34,8 +34,15 @@ public sealed class ClaudeCodeSessionHttpHandler : DelegatingHandler
     /// <summary>
     /// Initialises a new handler backed by the given <paramref name="provider"/>.
     /// </summary>
-    public ClaudeCodeSessionHttpHandler(ClaudeCodeSessionProvider provider)
-        : base(new HttpClientHandler())
+    /// <param name="provider">The session provider that resolves credentials.</param>
+    /// <param name="dangerouslyDisableSslValidation">
+    /// When <see langword="true"/>, disables SSL/TLS certificate validation.
+    /// Intended only for enterprise proxies with self-signed certificates.
+    /// </param>
+    public ClaudeCodeSessionHttpHandler(
+        ClaudeCodeSessionProvider provider,
+        bool dangerouslyDisableSslValidation = false)
+        : base(CreateInnerHandler(dangerouslyDisableSslValidation))
     {
         _provider = provider ?? throw new ArgumentNullException(nameof(provider));
     }
@@ -92,6 +99,24 @@ public sealed class ClaudeCodeSessionHttpHandler : DelegatingHandler
         }
 
         return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static HttpClientHandler CreateInnerHandler(bool disableSsl)
+    {
+        var handler = new HttpClientHandler();
+        if (disableSsl)
+        {
+#pragma warning disable MA0039 // Intentional: enterprise proxy support requires bypassing SSL validation
+#if NET5_0_OR_GREATER
+            handler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+#else
+            handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+#endif
+#pragma warning restore MA0039
+        }
+
+        return handler;
     }
 
     private static void SetOrReplace(HttpRequestMessage request, string name, string value)

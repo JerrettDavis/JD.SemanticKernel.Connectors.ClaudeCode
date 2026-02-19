@@ -70,7 +70,8 @@ public static class KernelBuilderExtensions
 
         // Pass a placeholder key — ClaudeCodeSessionHttpHandler replaces it with the
         // correct auth header (Bearer for OAuth tokens, x-api-key for standard keys).
-        var httpClient = new HttpClient(new ClaudeCodeSessionHttpHandler(provider));
+        var httpClient = new HttpClient(
+            new ClaudeCodeSessionHttpHandler(provider, options.DangerouslyDisableSslValidation));
         var anthropicClient = new AnthropicClient("placeholder-cleared-by-handler", httpClient);
 
         var chatClient = new ChatClientBuilder(anthropicClient.Messages)

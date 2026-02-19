@@ -55,14 +55,22 @@ public static class ClaudeCodeHttpClientFactory
             Options.Create(options),
             NullLogger<ClaudeCodeSessionProvider>.Instance);
 
-        return new HttpClient(new ClaudeCodeSessionHttpHandler(provider));
+        return new HttpClient(new ClaudeCodeSessionHttpHandler(provider, options.DangerouslyDisableSslValidation));
     }
 
     /// <summary>
     /// Creates an <see cref="HttpClient"/> backed by an existing <paramref name="provider"/>.
     /// Use this overload when the provider is already registered in a DI container.
     /// </summary>
-    public static HttpClient Create(ClaudeCodeSessionProvider provider) =>
+    /// <param name="provider">A pre-configured session provider.</param>
+    /// <param name="dangerouslyDisableSslValidation">
+    /// When <see langword="true"/>, disables SSL/TLS certificate validation.
+    /// Intended only for enterprise proxies with self-signed certificates.
+    /// </param>
+    public static HttpClient Create(
+        ClaudeCodeSessionProvider provider,
+        bool dangerouslyDisableSslValidation = false) =>
         new HttpClient(new ClaudeCodeSessionHttpHandler(
-            provider ?? throw new ArgumentNullException(nameof(provider))));
+            provider ?? throw new ArgumentNullException(nameof(provider)),
+            dangerouslyDisableSslValidation));
 }

@@ -82,7 +82,8 @@ public sealed class ConfigurationBindingTests
             {
                 ["ClaudeSession:ApiKey"] = "sk-ant-api-all",
                 ["ClaudeSession:OAuthToken"] = "sk-ant-oat-all",
-                ["ClaudeSession:CredentialsPath"] = "/all/path"
+                ["ClaudeSession:CredentialsPath"] = "/all/path",
+                ["ClaudeSession:DangerouslyDisableSslValidation"] = "true"
             })
             .Build();
 
@@ -96,6 +97,7 @@ public sealed class ConfigurationBindingTests
         Assert.Equal("sk-ant-api-all", options.ApiKey);
         Assert.Equal("sk-ant-oat-all", options.OAuthToken);
         Assert.Equal("/all/path", options.CredentialsPath);
+        Assert.True(options.DangerouslyDisableSslValidation);
     }
 
     [Fact]
@@ -115,6 +117,7 @@ public sealed class ConfigurationBindingTests
         Assert.Null(options.ApiKey);
         Assert.Null(options.OAuthToken);
         Assert.Null(options.CredentialsPath);
+        Assert.False(options.DangerouslyDisableSslValidation);
     }
 
     [Fact]
