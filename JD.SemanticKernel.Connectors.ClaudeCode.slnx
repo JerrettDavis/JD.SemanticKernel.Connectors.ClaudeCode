@@ -12,5 +12,6 @@
     <Project Path="samples/GherkinGenerator/GherkinGenerator.csproj" />
     <Project Path="samples/PullRequestReviewer/PullRequestReviewer.csproj" />
     <Project Path="samples/CodebaseExplorer/CodebaseExplorer.csproj" />
+    <Project Path="samples/TodoExtractor/TodoExtractor.csproj" />
   </Folder>
 </Solution>

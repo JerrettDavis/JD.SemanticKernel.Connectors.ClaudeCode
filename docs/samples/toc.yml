@@ -6,3 +6,5 @@
   href: pull-request-reviewer.md
 - name: jdxplr — Codebase Explorer
   href: codebase-explorer.md
+- name: TodoExtractor — Library Demo
+  href: todo-extractor.md
