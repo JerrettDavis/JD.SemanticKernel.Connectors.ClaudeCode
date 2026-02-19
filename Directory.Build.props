@@ -26,17 +26,17 @@
 
   <!-- Nerdbank.GitVersioning — single source of truth for all package/assembly versions -->
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115" PrivateAssets="all" />
+    <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- SourceLink for symbol servers -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Analyzers — enforce code quality across all projects -->
   <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.187" PrivateAssets="all" />
+    <PackageReference Include="Meziantou.Analyzer" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
