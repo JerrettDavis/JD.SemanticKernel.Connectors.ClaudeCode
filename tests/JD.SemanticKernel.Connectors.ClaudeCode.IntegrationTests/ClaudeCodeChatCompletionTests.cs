@@ -28,18 +28,25 @@ public sealed class ClaudeCodeChatCompletionTests
     {
         Skip.IfNot(CanRun, "Set CLAUDE_INTEGRATION_TESTS=true with valid credentials");
 
-        var kernel = Kernel.CreateBuilder()
-            .UseClaudeCodeChatCompletion()
-            .Build();
+        try
+        {
+            var kernel = Kernel.CreateBuilder()
+                .UseClaudeCodeChatCompletion()
+                .Build();
 
-        var chat = kernel.GetRequiredService<IChatCompletionService>();
-        var history = new ChatHistory();
-        history.AddUserMessage("Reply with exactly: INTEGRATION_TEST_OK");
+            var chat = kernel.GetRequiredService<IChatCompletionService>();
+            var history = new ChatHistory();
+            history.AddUserMessage("Reply with exactly: INTEGRATION_TEST_OK");
 
-        var response = await chat.GetChatMessageContentAsync(history);
+            var response = await chat.GetChatMessageContentAsync(history);
 
-        Assert.NotNull(response.Content);
-        Assert.NotEmpty(response.Content!);
+            Assert.NotNull(response.Content);
+            Assert.NotEmpty(response.Content!);
+        }
+        catch (Exception ex) when (IsSessionUnavailable(ex))
+        {
+            Skip.If(true, $"No active Claude session: {ex.GetBaseException().Message}");
+        }
     }
 
     [SkippableFact]
@@ -47,18 +54,25 @@ public sealed class ClaudeCodeChatCompletionTests
     {
         Skip.IfNot(CanRun, "Set CLAUDE_INTEGRATION_TESTS=true with valid credentials");
 
-        var kernel = Kernel.CreateBuilder()
-            .UseClaudeCodeChatCompletion(ClaudeModels.Sonnet)
-            .Build();
+        try
+        {
+            var kernel = Kernel.CreateBuilder()
+                .UseClaudeCodeChatCompletion(ClaudeModels.Sonnet)
+                .Build();
 
-        var chat = kernel.GetRequiredService<IChatCompletionService>();
-        var history = new ChatHistory();
-        history.AddUserMessage("Reply with exactly: MODEL_TEST_OK");
+            var chat = kernel.GetRequiredService<IChatCompletionService>();
+            var history = new ChatHistory();
+            history.AddUserMessage("Reply with exactly: MODEL_TEST_OK");
 
-        var response = await chat.GetChatMessageContentAsync(history);
+            var response = await chat.GetChatMessageContentAsync(history);
 
-        Assert.NotNull(response.Content);
-        Assert.NotEmpty(response.Content!);
+            Assert.NotNull(response.Content);
+            Assert.NotEmpty(response.Content!);
+        }
+        catch (Exception ex) when (IsSessionUnavailable(ex))
+        {
+            Skip.If(true, $"No active Claude session: {ex.GetBaseException().Message}");
+        }
     }
 
     [SkippableFact]
@@ -66,18 +80,25 @@ public sealed class ClaudeCodeChatCompletionTests
     {
         Skip.IfNot(CanRun, "Set CLAUDE_INTEGRATION_TESTS=true with valid credentials");
 
-        var kernel = Kernel.CreateBuilder()
-            .UseClaudeCodeChatCompletion(ClaudeModels.Haiku)
-            .Build();
+        try
+        {
+            var kernel = Kernel.CreateBuilder()
+                .UseClaudeCodeChatCompletion(ClaudeModels.Haiku)
+                .Build();
 
-        var chat = kernel.GetRequiredService<IChatCompletionService>();
-        var history = new ChatHistory();
-        history.AddUserMessage("Reply with exactly: HAIKU_TEST_OK");
+            var chat = kernel.GetRequiredService<IChatCompletionService>();
+            var history = new ChatHistory();
+            history.AddUserMessage("Reply with exactly: HAIKU_TEST_OK");
 
-        var response = await chat.GetChatMessageContentAsync(history);
+            var response = await chat.GetChatMessageContentAsync(history);
 
-        Assert.NotNull(response.Content);
-        Assert.NotEmpty(response.Content!);
+            Assert.NotNull(response.Content);
+            Assert.NotEmpty(response.Content!);
+        }
+        catch (Exception ex) when (IsSessionUnavailable(ex))
+        {
+            Skip.If(true, $"No active Claude session: {ex.GetBaseException().Message}");
+        }
     }
 
     [SkippableFact]
@@ -85,18 +106,30 @@ public sealed class ClaudeCodeChatCompletionTests
     {
         Skip.IfNot(CanRun, "Set CLAUDE_INTEGRATION_TESTS=true with valid credentials");
 
-        var kernel = Kernel.CreateBuilder()
-            .UseClaudeCodeChatCompletion()
-            .Build();
+        try
+        {
+            var kernel = Kernel.CreateBuilder()
+                .UseClaudeCodeChatCompletion()
+                .Build();
 
-        var chat = kernel.GetRequiredService<IChatCompletionService>();
-        var history = new ChatHistory();
-        history.AddSystemMessage("You are a helpful assistant. Always respond with valid JSON.");
-        history.AddUserMessage("Return a JSON object with a single key 'status' set to 'ok'.");
+            var chat = kernel.GetRequiredService<IChatCompletionService>();
+            var history = new ChatHistory();
+            history.AddSystemMessage("You are a helpful assistant. Always respond with valid JSON.");
+            history.AddUserMessage("Return a JSON object with a single key 'status' set to 'ok'.");
 
-        var response = await chat.GetChatMessageContentAsync(history);
+            var response = await chat.GetChatMessageContentAsync(history);
 
-        Assert.NotNull(response.Content);
-        Assert.Contains("ok", response.Content!, StringComparison.OrdinalIgnoreCase);
+            Assert.NotNull(response.Content);
+            Assert.Contains("ok", response.Content!, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (IsSessionUnavailable(ex))
+        {
+            Skip.If(true, $"No active Claude session: {ex.GetBaseException().Message}");
+        }
     }
+
+    private static bool IsSessionUnavailable(Exception ex) =>
+        ex is ClaudeCodeSessionException ||
+        ex.InnerException is ClaudeCodeSessionException ||
+        (ex is HttpRequestException http && (http.Message.Contains("401") || http.Message.Contains("403")));
 }
