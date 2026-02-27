@@ -154,6 +154,7 @@ var creds = await provider.GetCredentialsAsync();
 ### Related Projects
 
 - **[JD.SemanticKernel.Connectors.GitHubCopilot](https://github.com/JerrettDavis/JD.SemanticKernel.Connectors.GitHubCopilot)** — Same pattern for GitHub Copilot subscriptions
+- **[JD.SemanticKernel.Extensions](https://github.com/JerrettDavis/JD.SemanticKernel.Extensions)** — SK extensions for skills, hooks, plugins, compaction, and semantic memory
 
 ## License
 
