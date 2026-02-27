@@ -180,16 +180,20 @@ jobs:
 
       - name: Create git tag
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
           TAG="v${NBGV_NuGetPackageVersion}"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG already exists — skipping."
           else
-            git tag "$TAG"
-            git push origin "$TAG"
+            # Use GitHub API to create the tag ref (avoids workflows permission issue with git push)
+            gh api "repos/${{ github.repository }}/git/refs" \
+              -X POST \
+              -f "ref=refs/tags/$TAG" \
+              -f "sha=${{ github.sha }}"
+            echo "Created tag $TAG"
           fi
 
       - name: Create GitHub Release
