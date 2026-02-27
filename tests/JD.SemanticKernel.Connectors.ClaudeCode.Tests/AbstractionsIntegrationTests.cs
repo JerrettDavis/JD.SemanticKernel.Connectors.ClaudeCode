@@ -153,9 +153,9 @@ public sealed class AbstractionsIntegrationTests : IDisposable
         var models = await discovery.DiscoverModelsAsync();
 
         Assert.NotEmpty(models);
-        Assert.Contains(models, m => m.Id == ClaudeModels.Opus);
-        Assert.Contains(models, m => m.Id == ClaudeModels.Sonnet);
-        Assert.Contains(models, m => m.Id == ClaudeModels.Haiku);
+        Assert.Contains(models, m => string.Equals(m.Id, ClaudeModels.Opus, StringComparison.Ordinal));
+        Assert.Contains(models, m => string.Equals(m.Id, ClaudeModels.Sonnet, StringComparison.Ordinal));
+        Assert.Contains(models, m => string.Equals(m.Id, ClaudeModels.Haiku, StringComparison.Ordinal));
     }
 
     [Fact]
