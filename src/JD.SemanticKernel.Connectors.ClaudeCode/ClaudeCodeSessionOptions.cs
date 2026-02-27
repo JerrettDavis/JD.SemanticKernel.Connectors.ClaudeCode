@@ -1,3 +1,5 @@
+using JD.SemanticKernel.Connectors.Abstractions;
+
 namespace JD.SemanticKernel.Connectors.ClaudeCode;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace JD.SemanticKernel.Connectors.ClaudeCode;
 /// Bind from configuration section <c>"ClaudeSession"</c> or configure via
 /// <see cref="ServiceCollectionExtensions.AddClaudeCodeAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action{ClaudeCodeSessionOptions})"/>.
 /// </summary>
-public sealed class ClaudeCodeSessionOptions
+public sealed class ClaudeCodeSessionOptions : SessionOptionsBase
 {
     /// <summary>The default configuration section name.</summary>
     public const string SectionName = "ClaudeSession";
@@ -27,15 +29,4 @@ public sealed class ClaudeCodeSessionOptions
     /// Useful for CI/CD environments where the token is injected as a secret.
     /// </summary>
     public string? OAuthToken { get; set; }
-
-    /// <summary>
-    /// When <see langword="true"/>, disables SSL/TLS certificate validation on outgoing HTTP
-    /// requests.  This is intended <b>only</b> for enterprise environments behind TLS-intercepting
-    /// proxies or self-signed certificates.
-    /// <para>
-    /// <b>Warning:</b> enabling this option exposes all traffic to potential
-    /// man-in-the-middle attacks.  Do not enable in production.
-    /// </para>
-    /// </summary>
-    public bool DangerouslyDisableSslValidation { get; set; }
 }

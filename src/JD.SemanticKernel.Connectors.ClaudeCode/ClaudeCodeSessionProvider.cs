@@ -1,4 +1,5 @@
 using System.Text.Json;
+using JD.SemanticKernel.Connectors.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -14,7 +15,7 @@ namespace JD.SemanticKernel.Connectors.ClaudeCode;
 ///   <item><description><c>~/.claude/.credentials.json</c> — Claude Code local session</description></item>
 /// </list>
 /// </summary>
-public sealed class ClaudeCodeSessionProvider : IDisposable
+public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
 {
     private readonly ClaudeCodeSessionOptions _options;
     private readonly ILogger<ClaudeCodeSessionProvider> _logger;
@@ -96,6 +97,34 @@ public sealed class ClaudeCodeSessionProvider : IDisposable
         finally
         {
             _cacheLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Explicit implementation of <see cref="ISessionProvider.GetCredentialsAsync"/>.
+    /// Returns a normalised <see cref="SessionCredentials"/> wrapping the resolved token.
+    /// </summary>
+    async Task<SessionCredentials> ISessionProvider.GetCredentialsAsync(CancellationToken ct)
+    {
+        var token = await GetTokenAsync(ct).ConfigureAwait(false);
+        var oauthCreds = _cached;
+        var expiresAt = oauthCreds?.ExpiresAtUtc;
+        return new SessionCredentials(token, expiresAt);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> IsAuthenticatedAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            await GetTokenAsync(ct).ConfigureAwait(false);
+            return true;
+        }
+#pragma warning disable CA1031 // Intentional: check-don't-throw API
+        catch
+#pragma warning restore CA1031
+        {
+            return false;
         }
     }
 

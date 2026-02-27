@@ -130,6 +130,31 @@ dotnet tool restore
 dotnet docfx docfx.json
 ```
 
+## Shared Abstractions
+
+This connector implements the **JD.SemanticKernel.Connectors.Abstractions** interfaces,
+enabling multi-provider bridging:
+
+| Interface | Implementation |
+|---|---|
+| `ISessionProvider` | `ClaudeCodeSessionProvider` — credential resolution with `IsAuthenticatedAsync()` |
+| `IModelDiscoveryProvider` | `ClaudeModelDiscovery` — returns known Claude model catalogue |
+| `SessionOptionsBase` | `ClaudeCodeSessionOptions` — inherits `DangerouslyDisableSslValidation`, `CustomEndpoint` |
+
+Use the same abstractions across providers:
+
+```csharp
+ISessionProvider provider = isClaudeCode
+    ? claudeCodeProvider
+    : copilotProvider;
+
+var creds = await provider.GetCredentialsAsync();
+```
+
+### Related Projects
+
+- **[JD.SemanticKernel.Connectors.GitHubCopilot](https://github.com/JerrettDavis/JD.SemanticKernel.Connectors.GitHubCopilot)** — Same pattern for GitHub Copilot subscriptions
+
 ## License
 
 [MIT](LICENSE)
