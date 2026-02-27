@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/JD.SemanticKernel.Connectors.ClaudeCode.Tests/JD.SemanticKernel.Connectors.ClaudeCode.Tests.csproj" />
+    <Project Path="tests/JD.SemanticKernel.Connectors.ClaudeCode.IntegrationTests/JD.SemanticKernel.Connectors.ClaudeCode.IntegrationTests.csproj" />
     <Project Path="tests/GherkinGenerator.Tests/GherkinGenerator.Tests.csproj" />
     <Project Path="tests/PullRequestReviewer.Tests/PullRequestReviewer.Tests.csproj" />
     <Project Path="tests/CodebaseExplorer.Tests/CodebaseExplorer.Tests.csproj" />
