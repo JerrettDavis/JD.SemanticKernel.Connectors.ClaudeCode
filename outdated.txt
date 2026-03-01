@@ -1,0 +1,22 @@
+Discovering projects...
+Analyzing project(s)...
+Analyzing dependencies...
+» JD.SemanticKernel.Connectors.ClaudeCode
+  [net8.0]
+  JD.SemanticKernel.Connectors.Abstractions  0.1.4 -> 0.1.14
+  [net10.0]
+  JD.SemanticKernel.Connectors.Abstractions  0.1.4 -> 0.1.14
+  [.NETStandard,Version=v2.0]
+  JD.SemanticKernel.Connectors.Abstractions  0.1.4 -> 0.1.14
+
+Version color legend:
+<red>   : Major version update or pre-release version. Possible breaking changes.
+<yellow>: Minor version update. Backwards-compatible features added.
+<green> : Patch version update. Backwards-compatible bug fixes.
+
+Upgrading package JD.SemanticKernel.Connectors.Abstractions...
+Project JD.SemanticKernel.Connectors.ClaudeCode [net8.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [.NETStandard,Version=v2.0] upgraded successfully
+
+Elapsed: 00:00:14.8145783
