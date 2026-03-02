@@ -20,6 +20,8 @@ and follows the same core architecture.
 
 ## Installation
 
+![Installing the CLI tools](../images/install-tools.png)
+
 All three tools are published alongside the main NuGet package and share the same
 version (managed by [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning)):
 

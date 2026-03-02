@@ -7,6 +7,12 @@ integrating with existing [Reqnroll](https://reqnroll.net/) /
 
 ---
 
+## Demo
+
+![jdgerkinator in action](../images/gherkin-demo.png)
+
+---
+
 ## Quick start
 
 ```shell

@@ -6,6 +6,12 @@ creating architecture documentation, or feeding context into other AI tools.
 
 ---
 
+## Demo
+
+![jdxplr in action](../images/explorer-demo.png)
+
+---
+
 ## Quick start
 
 ```shell

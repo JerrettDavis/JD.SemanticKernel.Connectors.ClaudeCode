@@ -76,6 +76,8 @@ builder.Services.AddClaudeCodeAuthentication(builder.Configuration);
 
 ## Sample CLI Tools
 
+![CLI tools demo](docs/images/cli-help.png)
+
 This repo includes sample projects demonstrating agentic workflows with Semantic Kernel:
 
 | Tool | Command | Description |

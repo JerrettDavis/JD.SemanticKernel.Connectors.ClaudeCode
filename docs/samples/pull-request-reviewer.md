@@ -7,6 +7,12 @@ review via Claude.
 
 ---
 
+## Demo
+
+![jdpr in action](../images/pr-review-demo.png)
+
+---
+
 ## Quick start
 
 ```shell
