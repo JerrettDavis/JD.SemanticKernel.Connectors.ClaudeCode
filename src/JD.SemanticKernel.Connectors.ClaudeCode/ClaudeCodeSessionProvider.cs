@@ -236,7 +236,7 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
 #endif
 
         _logger.LogDebug(
-            "Credentials file not found; trying macOS Keychain service '{Service}'",
+            "Credentials unavailable from file; trying macOS Keychain service '{Service}'",
             MacOsKeychainService);
 
         var raw = await KeychainReader(MacOsKeychainService, ct).ConfigureAwait(false);
@@ -283,7 +283,7 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
                     FileName = "security",
                     Arguments = $"find-generic-password -s \"{serviceName}\" -w",
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true,
+                    RedirectStandardError = false,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 }
@@ -292,22 +292,46 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
             process.Start();
 
 #if NETSTANDARD2_0
-            var output = await Task
-                .Run(() =>
+            using (var registration = ct.Register(() =>
+            {
+                try
                 {
-                    // Read stdout before WaitForExit to avoid deadlock on full buffers.
-                    var result = process.StandardOutput.ReadToEnd();
-                    process.WaitForExit();
-                    return result;
-                }, ct)
-                .ConfigureAwait(false);
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    // Process has likely already exited; ignore.
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    // Killing the process may not be supported on some platforms; ignore.
+                }
+            }))
+            {
+                var output = await Task
+                    .Run(() =>
+                    {
+                        // Read stdout before WaitForExit to avoid deadlock on full buffers.
+                        var result = process.StandardOutput.ReadToEnd();
+                        process.WaitForExit();
+                        // Surface cancellation to the caller once the process has exited.
+                        ct.ThrowIfCancellationRequested();
+                        return result;
+                    })
+                    .ConfigureAwait(false);
+
+                return process.ExitCode == 0 ? output?.Trim() : null;
+            }
 #else
             var readTask = process.StandardOutput.ReadToEndAsync(ct);
             await process.WaitForExitAsync(ct).ConfigureAwait(false);
             var output = await readTask.ConfigureAwait(false);
-#endif
 
             return process.ExitCode == 0 ? output?.Trim() : null;
+#endif
         }
         catch (OperationCanceledException)
         {
