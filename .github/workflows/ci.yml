@@ -75,7 +75,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage-report
@@ -152,7 +152,7 @@ jobs:
           /p:ContinuousIntegrationBuild=true
 
       - name: Upload packages
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: nuget-packages
           path: |
