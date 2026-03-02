@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using JD.SemanticKernel.Connectors.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -12,15 +14,38 @@ namespace JD.SemanticKernel.Connectors.ClaudeCode;
 ///   <item><description><c>ClaudeSession:OAuthToken</c> in options/configuration</description></item>
 ///   <item><description><c>ANTHROPIC_API_KEY</c> environment variable</description></item>
 ///   <item><description><c>CLAUDE_CODE_OAUTH_TOKEN</c> environment variable</description></item>
-///   <item><description><c>~/.claude/.credentials.json</c> — Claude Code local session</description></item>
+///   <item><description><c>~/.claude/.credentials.json</c> — Claude Code local session (Linux/Windows)</description></item>
+///   <item><description>macOS system Keychain — Claude Code v2.1.63+ stores credentials there instead of a file on macOS</description></item>
 /// </list>
 /// </summary>
 public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
 {
+    // macOS Keychain service name used by Claude Code to store OAuth credentials.
+    private const string MacOsKeychainService = "Claude Code-credentials";
+
     private readonly ClaudeCodeSessionOptions _options;
     private readonly ILogger<ClaudeCodeSessionProvider> _logger;
     private readonly SemaphoreSlim _cacheLock = new(1, 1);
     private volatile ClaudeCodeOAuthCredentials? _cached;
+
+    /// <summary>
+    /// Pluggable macOS Keychain reader. Defaults to invoking the <c>security</c> CLI tool.
+    /// Tests can inject a stub to exercise the Keychain code path without a live macOS Keychain.
+    /// </summary>
+    internal Func<string, CancellationToken, Task<string?>> KeychainReader
+    {
+        get => _keychainReader;
+        set
+        {
+            _keychainReader = value;
+            _keychainReaderOverridden = true;
+        }
+    }
+
+    private Func<string, CancellationToken, Task<string?>> _keychainReader
+        = DefaultMacOsKeychainReader;
+
+    private bool _keychainReaderOverridden;
 
     /// <summary>
     /// Initialises the provider with DI-injected options and logger.
@@ -89,8 +114,8 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
             if (_cached is not null && !_cached.IsExpired)
                 return _cached;
 
-            var file = await ReadCredentialsFileAsync(ct)
-                .ConfigureAwait(false);
+            var file = await ReadCredentialsFileAsync(ct).ConfigureAwait(false);
+            file ??= await TryReadFromMacOsKeychainAsync(ct).ConfigureAwait(false);
             _cached = file?.ClaudeAiOauth;
             return _cached;
         }
@@ -206,6 +231,121 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
         {
             _logger.LogWarning(ex,
                 "Malformed JSON in credentials file at {Path}", path);
+            return null;
+        }
+    }
+
+    // Attempts to load credentials from the macOS Keychain where Claude Code v2.1.63+
+    // stores OAuth tokens instead of the plain-text .credentials.json file.
+    private async Task<ClaudeCodeCredentialsFile?> TryReadFromMacOsKeychainAsync(CancellationToken ct)
+    {
+        // Skip the OS gate when a test stub has been injected.
+        if (!_keychainReaderOverridden)
+        {
+#if NET5_0_OR_GREATER
+            if (!OperatingSystem.IsMacOS())
+                return null;
+#else
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return null;
+#endif
+        }
+
+        _logger.LogDebug(
+            "Credentials unavailable from file; trying macOS Keychain service '{Service}'",
+            MacOsKeychainService);
+
+        var raw = await KeychainReader(MacOsKeychainService, ct).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            _logger.LogDebug("macOS Keychain item '{Service}' not found or empty", MacOsKeychainService);
+            return null;
+        }
+
+        try
+        {
+            // Claude Code may store the full credentials file JSON or just the OAuth object.
+            var file = JsonSerializer.Deserialize<ClaudeCodeCredentialsFile>(raw!);
+            if (file?.ClaudeAiOauth is not null)
+                return file;
+
+            var oauth = JsonSerializer.Deserialize<ClaudeCodeOAuthCredentials>(raw!);
+            if (oauth is not null && !string.IsNullOrWhiteSpace(oauth.AccessToken))
+            {
+                _logger.LogDebug("macOS Keychain: credentials parsed as raw OAuth object");
+                return new ClaudeCodeCredentialsFile { ClaudeAiOauth = oauth };
+            }
+
+            return null;
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex,
+                "macOS Keychain item '{Service}' contained unparseable data", MacOsKeychainService);
+            return null;
+        }
+    }
+
+    // Runs `security find-generic-password -s "<service>" -w` and returns the password value,
+    // or null if the item does not exist or the command fails.
+    private static async Task<string?> DefaultMacOsKeychainReader(string serviceName, CancellationToken ct)
+    {
+        try
+        {
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "security",
+                    Arguments = $"find-generic-password -s \"{serviceName}\" -w",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = false,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+
+#if NETSTANDARD2_0
+            using (var registration = ct.Register(() =>
+            {
+                try
+                {
+                    if (!process.HasExited)
+                        process.Kill();
+                }
+                catch (InvalidOperationException) { }
+            }))
+            {
+                var output = await Task
+                    .Run(() =>
+                    {
+                        var result = process.StandardOutput.ReadToEnd();
+                        process.WaitForExit();
+                        ct.ThrowIfCancellationRequested();
+                        return result;
+                    })
+                    .ConfigureAwait(false);
+
+                return process.ExitCode == 0 ? output?.Trim() : null;
+            }
+#else
+            var readTask = process.StandardOutput.ReadToEndAsync(ct);
+            await process.WaitForExitAsync(ct).ConfigureAwait(false);
+            var output = await readTask.ConfigureAwait(false);
+
+            return process.ExitCode == 0 ? output?.Trim() : null;
+#endif
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+#pragma warning disable CA1031 // Intentional: swallow all other failures from the security CLI
+        catch
+#pragma warning restore CA1031
+        {
             return null;
         }
     }

@@ -95,8 +95,10 @@ public sealed class ClaudeCodeSessionProviderTests : IDisposable
     [Fact]
     public async Task GetTokenAsync_Throws_WhenNoCredentialsFileAndNoOverrides()
     {
-        // Point to a non-existent credentials file so we don't pick up real creds.
+        // Point to a non-existent file and disable the Keychain fallback so neither
+        // source can provide a token — the provider must throw.
         var provider = Build(o => o.CredentialsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+        provider.KeychainReader = (_, _) => Task.FromResult<string?>(null);
         await Assert.ThrowsAsync<ClaudeCodeSessionException>(() => provider.GetTokenAsync());
     }
 
@@ -161,7 +163,9 @@ public sealed class ClaudeCodeSessionProviderTests : IDisposable
     [Fact]
     public async Task GetCredentialsAsync_ReturnsNull_WhenFileDoesNotExist()
     {
+        // Disable the Keychain fallback so neither source provides credentials.
         var provider = Build(o => o.CredentialsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+        provider.KeychainReader = (_, _) => Task.FromResult<string?>(null);
         var creds = await provider.GetCredentialsAsync();
         Assert.Null(creds);
     }
@@ -178,6 +182,130 @@ public sealed class ClaudeCodeSessionProviderTests : IDisposable
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(
             () => provider.GetTokenAsync(cts.Token));
+    }
+
+    // ── macOS Keychain fallback ─────────────────────────────────
+
+    [Fact]
+    public async Task GetTokenAsync_ReturnsToken_FromKeychainWrappedFormat_WhenFileAbsent()
+    {
+        // Simulate macOS Keychain returning the full credentials-file JSON.
+        var futureMs = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeMilliseconds();
+        var keychainJson = $$"""
+            {
+              "claudeAiOauth": {
+                "accessToken": "sk-ant-oat-from-keychain",
+                "refreshToken": "refresh",
+                "expiresAt": {{futureMs}},
+                "scopes": []
+              }
+            }
+            """;
+
+        var provider = Build(o => o.CredentialsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+        provider.KeychainReader = (_, _) => Task.FromResult<string?>(keychainJson);
+
+        var token = await provider.GetTokenAsync();
+        Assert.Equal("sk-ant-oat-from-keychain", token);
+    }
+
+    [Fact]
+    public async Task GetTokenAsync_ReturnsToken_FromKeychainRawOAuthFormat_WhenFileAbsent()
+    {
+        // Claude Code may store just the OAuth object without the file wrapper.
+        var futureMs = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeMilliseconds();
+        var rawOAuthJson = $$"""
+            {
+              "accessToken": "sk-ant-oat-raw-oauth",
+              "refreshToken": "refresh",
+              "expiresAt": {{futureMs}},
+              "scopes": []
+            }
+            """;
+
+        var provider = Build(o => o.CredentialsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+        provider.KeychainReader = (_, _) => Task.FromResult<string?>(rawOAuthJson);
+
+        var token = await provider.GetTokenAsync();
+        Assert.Equal("sk-ant-oat-raw-oauth", token);
+    }
+
+    [Fact]
+    public async Task GetTokenAsync_Throws_WhenFileAbsentAndKeychainReturnsNull()
+    {
+        var provider = Build(o => o.CredentialsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+        provider.KeychainReader = (_, _) => Task.FromResult<string?>(null);
+
+        await Assert.ThrowsAsync<ClaudeCodeSessionException>(() => provider.GetTokenAsync());
+    }
+
+    [Fact]
+    public async Task GetTokenAsync_Throws_WhenFileAbsentAndKeychainReturnsInvalidJson()
+    {
+        var provider = Build(o => o.CredentialsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+        provider.KeychainReader = (_, _) => Task.FromResult<string?>("not-valid-json");
+
+        await Assert.ThrowsAsync<ClaudeCodeSessionException>(() => provider.GetTokenAsync());
+    }
+
+    [Fact]
+    public async Task GetTokenAsync_Throws_WhenFileAbsentAndKeychainHasExpiredToken()
+    {
+        var expiredMs = DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeMilliseconds();
+        var keychainJson = $$"""
+            {
+              "claudeAiOauth": {
+                "accessToken": "sk-ant-oat-expired",
+                "refreshToken": "refresh",
+                "expiresAt": {{expiredMs}},
+                "scopes": []
+              }
+            }
+            """;
+
+        var provider = Build(o => o.CredentialsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+        provider.KeychainReader = (_, _) => Task.FromResult<string?>(keychainJson);
+
+        await Assert.ThrowsAsync<ClaudeCodeSessionException>(() => provider.GetTokenAsync());
+    }
+
+    [Fact]
+    public async Task GetTokenAsync_PrefersCredentialsFile_OverKeychain()
+    {
+        // File has a valid token — Keychain should never be consulted.
+        var futureMs = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeMilliseconds();
+        var fileJson = $$"""
+            {
+              "claudeAiOauth": {
+                "accessToken": "sk-ant-oat-from-file",
+                "refreshToken": "refresh",
+                "expiresAt": {{futureMs}},
+                "scopes": []
+              }
+            }
+            """;
+
+        var path = Path.GetTempFileName();
+        try
+        {
+            await File.WriteAllTextAsync(path, fileJson);
+
+            var keychainCalled = false;
+            var provider = Build(o => o.CredentialsPath = path);
+            provider.KeychainReader = (_, _) =>
+            {
+                keychainCalled = true;
+                return Task.FromResult<string?>("sk-ant-oat-from-keychain");
+            };
+
+            var token = await provider.GetTokenAsync();
+            Assert.Equal("sk-ant-oat-from-file", token);
+            Assert.False(keychainCalled, "Keychain should not be consulted when the credentials file is present");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 
     [Fact]
