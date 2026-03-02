@@ -32,8 +32,20 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
     /// Pluggable macOS Keychain reader. Defaults to invoking the <c>security</c> CLI tool.
     /// Tests can inject a stub to exercise the Keychain code path without a live macOS Keychain.
     /// </summary>
-    internal Func<string, CancellationToken, Task<string?>> KeychainReader { get; set; }
+    internal Func<string, CancellationToken, Task<string?>> KeychainReader
+    {
+        get => _keychainReader;
+        set
+        {
+            _keychainReader = value;
+            _keychainReaderOverridden = true;
+        }
+    }
+
+    private Func<string, CancellationToken, Task<string?>> _keychainReader
         = DefaultMacOsKeychainReader;
+
+    private bool _keychainReaderOverridden;
 
     /// <summary>
     /// Initialises the provider with DI-injected options and logger.
@@ -227,16 +239,20 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
     // stores OAuth tokens instead of the plain-text .credentials.json file.
     private async Task<ClaudeCodeCredentialsFile?> TryReadFromMacOsKeychainAsync(CancellationToken ct)
     {
+        // Skip the OS gate when a test stub has been injected.
+        if (!_keychainReaderOverridden)
+        {
 #if NET5_0_OR_GREATER
-        if (!OperatingSystem.IsMacOS())
-            return null;
+            if (!OperatingSystem.IsMacOS())
+                return null;
 #else
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            return null;
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return null;
 #endif
+        }
 
         _logger.LogDebug(
-            "Credentials file not found; trying macOS Keychain service '{Service}'",
+            "Credentials unavailable from file; trying macOS Keychain service '{Service}'",
             MacOsKeychainService);
 
         var raw = await KeychainReader(MacOsKeychainService, ct).ConfigureAwait(false);
@@ -283,7 +299,7 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
                     FileName = "security",
                     Arguments = $"find-generic-password -s \"{serviceName}\" -w",
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true,
+                    RedirectStandardError = false,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 }
@@ -292,22 +308,35 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
             process.Start();
 
 #if NETSTANDARD2_0
-            var output = await Task
-                .Run(() =>
+            using (var registration = ct.Register(() =>
+            {
+                try
                 {
-                    // Read stdout before WaitForExit to avoid deadlock on full buffers.
-                    var result = process.StandardOutput.ReadToEnd();
-                    process.WaitForExit();
-                    return result;
-                }, ct)
-                .ConfigureAwait(false);
+                    if (!process.HasExited)
+                        process.Kill();
+                }
+                catch (InvalidOperationException) { }
+            }))
+            {
+                var output = await Task
+                    .Run(() =>
+                    {
+                        var result = process.StandardOutput.ReadToEnd();
+                        process.WaitForExit();
+                        ct.ThrowIfCancellationRequested();
+                        return result;
+                    })
+                    .ConfigureAwait(false);
+
+                return process.ExitCode == 0 ? output?.Trim() : null;
+            }
 #else
             var readTask = process.StandardOutput.ReadToEndAsync(ct);
             await process.WaitForExitAsync(ct).ConfigureAwait(false);
             var output = await readTask.ConfigureAwait(false);
-#endif
 
             return process.ExitCode == 0 ? output?.Trim() : null;
+#endif
         }
         catch (OperationCanceledException)
         {
