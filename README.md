@@ -7,16 +7,27 @@
 [![codecov](https://codecov.io/gh/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode/graph/badge.svg)](https://codecov.io/gh/JerrettDavis/JD.SemanticKernel.Connectors.ClaudeCode)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A **Semantic Kernel connector** that bridges your local [Claude Code](https://claude.ai/download) OAuth session into Microsoft Semantic Kernel — no manual API key management needed.
+A **Semantic Kernel connector** for Anthropic models with API-key-first authentication and optional local Claude Code OAuth support.
 
 ## Features
 
-- **Zero-config authentication** — automatically reads `~/.claude/.credentials.json`
-- **Multi-source credential resolution** — options → env vars → local session, in priority order
-- **OAuth & API key support** — handles `sk-ant-oat*` (Bearer) and `sk-ant-api*` (x-api-key) tokens
+- **API-key-first authentication** — supports `sk-ant-api*` via options or `ANTHROPIC_API_KEY`
+- **Optional local OAuth support** — `sk-ant-oat*` is opt-in and interactive-only
+- **Multi-source credential resolution** — options/env API key first, then local OAuth sources
 - **Full Semantic Kernel integration** — `IKernelBuilder.UseClaudeCodeChatCompletion()` one-liner
 - **DI-friendly** — `IServiceCollection.AddClaudeCodeAuthentication()` for ASP.NET Core / Generic Host
 - **Broad TFM support** — `netstandard2.0`, `net8.0`, `net10.0`
+
+## Compliance Defaults
+
+- OAuth token support is **disabled by default**.
+- OAuth usage requires `EnableOAuthTokenSupport = true` and an interactive session.
+- Unattended or automated OAuth workflows are intentionally blocked.
+- For service, CI, or unattended usage, use Anthropic API keys (`sk-ant-api*`).
+- Anthropic Consumer Terms (effective October 8, 2025) apply to consumer-service usage:
+  <https://www.anthropic.com/legal/consumer-terms>
+- Anthropic API keys are governed by Anthropic Commercial Terms:
+  <https://www.anthropic.com/legal/commercial-terms>
 
 ## Quick Start
 
@@ -32,7 +43,7 @@ dotnet add package JD.SemanticKernel.Connectors.ClaudeCode
 using JD.SemanticKernel.Connectors.ClaudeCode;
 
 var builder = Kernel.CreateBuilder();
-builder.UseClaudeCodeChatCompletion(); // defaults to ClaudeModels.Default (Sonnet)
+builder.UseClaudeCodeChatCompletion(apiKey: "sk-ant-api..."); // defaults to ClaudeModels.Default (Sonnet)
 var kernel = builder.Build();
 
 var result = await kernel.InvokePromptAsync("Hello, Claude!");
@@ -45,6 +56,7 @@ Console.WriteLine(result);
 builder.Services.AddClaudeCodeAuthentication(options =>
 {
     options.CredentialsPath = "/custom/path/.credentials.json"; // optional
+    options.EnableOAuthTokenSupport = true; // only for local interactive OAuth use
 });
 ```
 
@@ -55,6 +67,7 @@ builder.Services.AddClaudeCodeAuthentication(options =>
   "ClaudeSession": {
     "ApiKey": null,
     "OAuthToken": null,
+    "EnableOAuthTokenSupport": false,
     "CredentialsPath": null
   }
 }
@@ -69,10 +82,9 @@ builder.Services.AddClaudeCodeAuthentication(builder.Configuration);
 | Priority | Source | Description |
 |----------|--------|-------------|
 | 1 | `ClaudeSession:ApiKey` | Explicit API key in options/config |
-| 2 | `ClaudeSession:OAuthToken` | Explicit OAuth token in options/config |
-| 3 | `ANTHROPIC_API_KEY` env var | Environment variable |
-| 4 | `CLAUDE_CODE_OAUTH_TOKEN` env var | Environment variable |
-| 5 | `~/.claude/.credentials.json` | Claude Code local session file |
+| 2 | `ANTHROPIC_API_KEY` env var | Environment variable |
+| 3 | `ClaudeSession:OAuthToken` | Explicit OAuth token (requires `EnableOAuthTokenSupport = true`) |
+| 4 | `~/.claude/.credentials.json` | Local Claude Code session (requires `EnableOAuthTokenSupport = true`) |
 
 ## Sample CLI Tools
 

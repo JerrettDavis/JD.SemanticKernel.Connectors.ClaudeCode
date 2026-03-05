@@ -30,10 +30,13 @@ public sealed class ProviderErrorHandlingTests : IDisposable
     private static ClaudeCodeSessionProvider Build(Action<ClaudeCodeSessionOptions>? configure = null)
     {
         var options = new ClaudeCodeSessionOptions();
+        options.EnableOAuthTokenSupport = true;
         configure?.Invoke(options);
-        return new ClaudeCodeSessionProvider(
+        var provider = new ClaudeCodeSessionProvider(
             Options.Create(options),
             NullLogger<ClaudeCodeSessionProvider>.Instance);
+        provider.InteractiveSessionDetector = () => true;
+        return provider;
     }
 
     [Fact]
@@ -313,13 +316,11 @@ public sealed class ProviderErrorHandlingTests : IDisposable
     }
 
     [Fact]
-    public async Task GetTokenAsync_EnvVar_OAuthUsedWhenNoApiKey()
+    public async Task GetTokenAsync_EnvVar_OAuthIsIgnoredWhenNoApiKey()
     {
         Environment.SetEnvironmentVariable("CLAUDE_CODE_OAUTH_TOKEN", "sk-ant-oat-env-only");
 
-        var provider = Build();
-        var token = await provider.GetTokenAsync();
-
-        Assert.Equal("sk-ant-oat-env-only", token);
+        var provider = Build(o => o.EnableOAuthTokenSupport = false);
+        await Assert.ThrowsAsync<ClaudeCodeSessionException>(() => provider.GetTokenAsync());
     }
 }

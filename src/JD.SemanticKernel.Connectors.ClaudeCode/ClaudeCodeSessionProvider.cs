@@ -11,11 +11,10 @@ namespace JD.SemanticKernel.Connectors.ClaudeCode;
 /// Resolves Claude API credentials from multiple sources in priority order:
 /// <list type="number">
 ///   <item><description><c>ClaudeSession:ApiKey</c> in options/configuration</description></item>
-///   <item><description><c>ClaudeSession:OAuthToken</c> in options/configuration</description></item>
 ///   <item><description><c>ANTHROPIC_API_KEY</c> environment variable</description></item>
-///   <item><description><c>CLAUDE_CODE_OAUTH_TOKEN</c> environment variable</description></item>
-///   <item><description><c>~/.claude/.credentials.json</c> — Claude Code local session (Linux/Windows)</description></item>
-///   <item><description>macOS system Keychain — Claude Code v2.1.63+ stores credentials there instead of a file on macOS</description></item>
+///   <item><description><c>ClaudeSession:OAuthToken</c> in options/configuration (requires OAuth opt-in and interactive session)</description></item>
+///   <item><description><c>~/.claude/.credentials.json</c> — Claude Code local session (requires OAuth opt-in and interactive session)</description></item>
+///   <item><description>macOS system Keychain — Claude Code v2.1.63+ stores credentials there instead of a file on macOS (requires OAuth opt-in and interactive session)</description></item>
 /// </list>
 /// </summary>
 public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
@@ -27,6 +26,7 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
     private readonly ILogger<ClaudeCodeSessionProvider> _logger;
     private readonly SemaphoreSlim _cacheLock = new(1, 1);
     private volatile ClaudeCodeOAuthCredentials? _cached;
+    private Func<bool> _interactiveSessionDetector = IsLikelyInteractiveSession;
 
     /// <summary>
     /// Pluggable macOS Keychain reader. Defaults to invoking the <c>security</c> CLI tool.
@@ -46,6 +46,16 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
         = DefaultMacOsKeychainReader;
 
     private bool _keychainReaderOverridden;
+
+    /// <summary>
+    /// Pluggable detector for whether the process is interactive.
+    /// Defaults to a conservative check that treats CI/container/non-terminal contexts as non-interactive.
+    /// </summary>
+    internal Func<bool> InteractiveSessionDetector
+    {
+        get => _interactiveSessionDetector;
+        set => _interactiveSessionDetector = value ?? throw new ArgumentNullException(nameof(value));
+    }
 
     /// <summary>
     /// Initialises the provider with DI-injected options and logger.
@@ -71,27 +81,20 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
         if (!string.IsNullOrWhiteSpace(_options.ApiKey))
         {
             _logger.LogDebug("Using explicit API key from options");
-            return _options.ApiKey!;
-        }
-
-        if (!string.IsNullOrWhiteSpace(_options.OAuthToken))
-        {
-            _logger.LogDebug("Using explicit OAuth token from options");
-            return _options.OAuthToken!;
+            return ValidateOAuthTokenUsage(_options.ApiKey!, "ClaudeSession:ApiKey");
         }
 
         var envApiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
         if (!string.IsNullOrWhiteSpace(envApiKey))
         {
             _logger.LogDebug("Using ANTHROPIC_API_KEY environment variable");
-            return envApiKey!;
+            return ValidateOAuthTokenUsage(envApiKey!, "ANTHROPIC_API_KEY");
         }
 
-        var envOAuth = Environment.GetEnvironmentVariable("CLAUDE_CODE_OAUTH_TOKEN");
-        if (!string.IsNullOrWhiteSpace(envOAuth))
+        if (!string.IsNullOrWhiteSpace(_options.OAuthToken))
         {
-            _logger.LogDebug("Using CLAUDE_CODE_OAUTH_TOKEN environment variable");
-            return envOAuth!;
+            _logger.LogDebug("Using explicit OAuth token from options");
+            return ValidateOAuthTokenUsage(_options.OAuthToken!, "ClaudeSession:OAuthToken");
         }
 
         return await ExtractFromCredentialsFileAsync(ct).ConfigureAwait(false);
@@ -159,8 +162,8 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
 
         if (creds is null)
             throw new ClaudeCodeSessionException(
-                "No Claude credentials found. " +
-                "Install Claude Code from https://claude.ai/download and run 'claude login'.");
+                "No credentials found. Set ANTHROPIC_API_KEY for API-key access, or enable OAuth support " +
+                "for local interactive Claude Code sessions.");
 
         if (creds.IsExpired)
             throw new ClaudeCodeSessionException(
@@ -178,7 +181,7 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
             creds.SubscriptionType ?? "unknown",
             creds.RateLimitTier ?? "unknown");
 
-        return creds.AccessToken;
+        return ValidateOAuthTokenUsage(creds.AccessToken, "local Claude Code session");
     }
 
     private async Task<ClaudeCodeCredentialsFile?> ReadCredentialsFileAsync(CancellationToken ct)
@@ -356,6 +359,63 @@ public sealed class ClaudeCodeSessionProvider : ISessionProvider, IDisposable
             : Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 ".claude", ".credentials.json");
+
+    private string ValidateOAuthTokenUsage(string token, string source)
+    {
+        if (!token.StartsWith("sk-ant-oat", StringComparison.Ordinal))
+            return token;
+
+        if (!_options.EnableOAuthTokenSupport)
+            throw new ClaudeCodeSessionException(
+                "OAuth token support is disabled by default. " +
+                "Set ClaudeSession:EnableOAuthTokenSupport=true only for local interactive use, " +
+                "or use ANTHROPIC_API_KEY for service and automation scenarios.");
+
+        if (!InteractiveSessionDetector())
+            throw new ClaudeCodeSessionException(
+                "OAuth tokens are only supported in local interactive sessions. " +
+                "This process appears non-interactive. Use ANTHROPIC_API_KEY for unattended or automated workflows.");
+
+        _logger.LogInformation("Using OAuth token from {Source} in interactive mode", source);
+        return token;
+    }
+
+    private static bool IsLikelyInteractiveSession()
+    {
+        if (IsTruthy(Environment.GetEnvironmentVariable("CI")))
+            return false;
+        if (IsTruthy(Environment.GetEnvironmentVariable("GITHUB_ACTIONS")))
+            return false;
+        if (IsTruthy(Environment.GetEnvironmentVariable("TF_BUILD")))
+            return false;
+        if (IsTruthy(Environment.GetEnvironmentVariable("TEAMCITY_VERSION")))
+            return false;
+        if (IsTruthy(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER")))
+            return false;
+        if (!Environment.UserInteractive)
+            return false;
+
+        try
+        {
+            if (Console.IsInputRedirected || Console.IsOutputRedirected || Console.IsErrorRedirected)
+                return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsTruthy(string? value) =>
+        string.Equals(value, "1", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(value, "yes", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
     public void Dispose() => _cacheLock.Dispose();

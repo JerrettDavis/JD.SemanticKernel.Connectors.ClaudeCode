@@ -26,7 +26,14 @@ public sealed class ClaudeCodeSessionOptions : SessionOptionsBase
 
     /// <summary>
     /// Override: use an explicit OAuth token (<c>sk-ant-oat*</c>) instead of reading from file.
-    /// Useful for CI/CD environments where the token is injected as a secret.
+    /// OAuth support is disabled by default and intended only for local, interactive use.
     /// </summary>
     public string? OAuthToken { get; set; }
+
+    /// <summary>
+    /// Enables OAuth token support (<c>sk-ant-oat*</c>) from
+    /// <see cref="OAuthToken"/> and local Claude Code credentials.
+    /// Defaults to <see langword="false"/> to avoid accidental non-compliant usage.
+    /// </summary>
+    public bool EnableOAuthTokenSupport { get; set; }
 }

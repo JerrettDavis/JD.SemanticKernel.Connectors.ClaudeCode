@@ -1,43 +1,35 @@
 # Credential Resolution
 
-`ClaudeCodeSessionProvider.GetTokenAsync()` walks through five credential sources in priority
+`ClaudeCodeSessionProvider.GetTokenAsync()` walks through four credential sources in priority
 order, returning the first non-empty token it finds.
 
 ## Resolution order
 
 ```
 1. ClaudeCodeSessionOptions.ApiKey          (explicit option / configuration)
-2. ClaudeCodeSessionOptions.OAuthToken      (explicit option / configuration)
-3. ANTHROPIC_API_KEY                        (environment variable)
-4. CLAUDE_CODE_OAUTH_TOKEN                  (environment variable)
-5. ~/.claude/.credentials.json              (Claude Code local session)
+2. ANTHROPIC_API_KEY                        (environment variable)
+3. ClaudeCodeSessionOptions.OAuthToken      (explicit option / configuration)
+4. ~/.claude/.credentials.json              (Claude Code local session)
 ```
 
-The first source that produces a non-whitespace value wins. Sources 1–4 are returned as-is with
-no further validation. Source 5 is validated for expiry before use.
+The first source that produces a non-whitespace value wins.
 
 ---
 
-## Source 1 & 2 — explicit options
+## Source 1 — explicit API key option
 
-The highest-priority overrides. Set these programmatically or via
+The highest-priority override. Set it programmatically or via
 [`appsettings.json`](configuration-reference.md):
 
 ```csharp
-// API key wins over everything else
 services.AddClaudeCodeAuthentication(o => o.ApiKey = "sk-ant-api...");
-
-// OAuth token (useful when injecting from a secret manager)
-services.AddClaudeCodeAuthentication(o => o.OAuthToken = "sk-ant-oat...");
 ```
-
-`ApiKey` takes priority over `OAuthToken` if both are set.
 
 ---
 
-## Source 3 — `ANTHROPIC_API_KEY` environment variable
+## Source 2 — `ANTHROPIC_API_KEY` environment variable
 
-The standard Anthropic SDK environment variable. Useful for CI/CD pipelines:
+The standard Anthropic SDK environment variable. Recommended for service/automation scenarios:
 
 ```shell
 export ANTHROPIC_API_KEY=sk-ant-api...
@@ -45,18 +37,21 @@ export ANTHROPIC_API_KEY=sk-ant-api...
 
 ---
 
-## Source 4 — `CLAUDE_CODE_OAUTH_TOKEN` environment variable
+## Source 3 — explicit OAuth option (opt-in)
 
-Used when you want to inject an OAuth token via the environment — for example in a Docker
-container where you pass the host machine's token in:
+OAuth support is disabled by default. To use an explicit OAuth token, you must opt in:
 
-```shell
-export CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat...
+```csharp
+services.AddClaudeCodeAuthentication(o =>
+{
+    o.EnableOAuthTokenSupport = true;
+    o.OAuthToken = "sk-ant-oat...";
+});
 ```
 
 ---
 
-## Source 5 — `~/.claude/.credentials.json`
+## Source 4 — `~/.claude/.credentials.json` (opt-in)
 
 The Claude Code local installation stores OAuth credentials here after `claude login`.
 The file structure is:
@@ -77,6 +72,16 @@ The file structure is:
 The `expiresAt` field is a Unix timestamp in **milliseconds**. If the token is expired,
 `ClaudeCodeSessionException` is thrown with a message directing the user to run `claude login`.
 
+To enable file-based OAuth resolution:
+
+```csharp
+services.AddClaudeCodeAuthentication(o =>
+{
+    o.EnableOAuthTokenSupport = true;
+    o.CredentialsPath = "/opt/claude/.credentials.json"; // optional override
+});
+```
+
 ### Custom path
 
 Override the default credentials file location via options:
@@ -91,6 +96,7 @@ Or in `appsettings.json`:
 ```json
 {
   "ClaudeSession": {
+    "EnableOAuthTokenSupport": true,
     "CredentialsPath": "/opt/claude/.credentials.json"
   }
 }
@@ -98,7 +104,11 @@ Or in `appsettings.json`:
 
 ---
 
-## Token type detection
+## OAuth safety checks
+
+- OAuth support must be explicitly enabled (`EnableOAuthTokenSupport=true`).
+- OAuth requests must run in an interactive session.
+- Non-interactive/unattended OAuth use is blocked intentionally.
 
 Once a token is resolved, `ClaudeCodeSessionHttpHandler` inspects the token string to determine
 the correct authentication strategy:

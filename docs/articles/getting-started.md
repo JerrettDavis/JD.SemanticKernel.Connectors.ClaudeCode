@@ -3,8 +3,8 @@
 ## Prerequisites
 
 - .NET 8 or .NET 10
-- [Claude Code](https://claude.ai/download) installed and authenticated (`claude login`)
-- **Or** an Anthropic API key (`sk-ant-api*`) if you prefer explicit key auth
+- An Anthropic API key (`sk-ant-api*`) for standard usage
+- Optional: [Claude Code](https://claude.ai/download) installed and authenticated (`claude login`) for local interactive OAuth usage
 
 ## Installation
 
@@ -20,33 +20,38 @@ dotnet add package Microsoft.SemanticKernel
 
 ---
 
-## Minimal example — use your local Claude Code session
+## Minimal example — API key
 
 ```csharp
 using Microsoft.SemanticKernel;
 using JD.SemanticKernel.Connectors.ClaudeCode;
 
 var kernel = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion()   // reads ~/.claude/.credentials.json
+    .UseClaudeCodeChatCompletion(apiKey: "sk-ant-api...")
     .Build();
 
 var result = await kernel.InvokePromptAsync("Explain async/await in two sentences.");
 Console.WriteLine(result);
 ```
 
-That's it. The package reads your local Claude Code session automatically.
+That's it. API-key authentication is the default and recommended path.
 
 ---
 
-## Explicit API key override
+## Optional local OAuth (interactive only)
 
-If you prefer to supply a key directly — for CI/CD or environments without Claude Code installed:
+OAuth support is disabled by default. Enable it explicitly for local interactive sessions:
 
 ```csharp
 var kernel = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion(apiKey: "sk-ant-api...")
+    .UseClaudeCodeChatCompletion(configure: o =>
+    {
+        o.EnableOAuthTokenSupport = true;
+    })
     .Build();
 ```
+
+For unattended or automated workflows, use API keys instead of OAuth.
 
 ---
 

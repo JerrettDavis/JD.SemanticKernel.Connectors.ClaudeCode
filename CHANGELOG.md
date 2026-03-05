@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Version numbers are managed by [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning).
 
+## [Unreleased]
+
+### Changed
+- Made authentication compliance-first: API-key sources are prioritized, and `CLAUDE_CODE_OAUTH_TOKEN` is no longer a credential source.
+- Added `ClaudeCodeSessionOptions.EnableOAuthTokenSupport` (default `false`).
+- Enforced OAuth safeguards in `ClaudeCodeSessionProvider`: OAuth tokens now require explicit opt-in and an interactive session.
+- Updated README and DocFX documentation to remove unattended OAuth guidance and clarify API-key usage for automation/CI.
+
 ## [0.1] — 2026-02-19
 
 ### Added

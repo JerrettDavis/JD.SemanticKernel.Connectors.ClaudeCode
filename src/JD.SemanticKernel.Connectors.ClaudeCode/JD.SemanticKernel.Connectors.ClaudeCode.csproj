@@ -4,9 +4,9 @@
     <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
     <PackageId>JD.SemanticKernel.Connectors.ClaudeCode</PackageId>
     <Description>
-      Claude Code session connector for Semantic Kernel. Provides UseClaudeCodeChatCompletion()
-      to wire local Claude Code OAuth credentials (or an explicit API key) into any Semantic Kernel
-      application without managing tokens manually.
+      Claude connector for Semantic Kernel with API-key-first authentication and optional
+      local interactive OAuth support. Provides UseClaudeCodeChatCompletion() to wire
+      Claude access into Semantic Kernel applications.
     </Description>
     <PackageTags>semantic-kernel;connectors;anthropic;claude;claude-code;authentication;ai;oauth</PackageTags>
     <IsPackable>true</IsPackable>
