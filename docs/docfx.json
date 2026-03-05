@@ -36,7 +36,7 @@
       "_appName": "JD.SemanticKernel.Connectors.ClaudeCode",
       "_appTitle": "JD.SemanticKernel.Connectors.ClaudeCode",
       "_appFooter": "JD.SemanticKernel.Connectors.ClaudeCode — MIT License",
-      "_description": "Claude Code session connector for Microsoft Semantic Kernel. Bridges local Claude Code OAuth credentials into any SK application.",
+      "_description": "Claude connector for Microsoft Semantic Kernel with API-key-first auth and optional local interactive OAuth support.",
       "_copyright": "Copyright © 2025 JD. Licensed under the MIT License.",
       "_enableSearch": true,
       "_disableContribution": false

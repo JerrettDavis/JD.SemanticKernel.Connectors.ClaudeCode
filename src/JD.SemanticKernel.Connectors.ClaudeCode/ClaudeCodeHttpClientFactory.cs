@@ -9,7 +9,7 @@ namespace JD.SemanticKernel.Connectors.ClaudeCode;
 ///
 /// <para>
 /// Use this factory when you want to bring your own Anthropic SDK integration but still
-/// benefit from automatic Claude Code session or api-key resolution.  For example:
+/// benefit from automatic Claude Code session or API-key resolution. For example:
 /// </para>
 /// <code>
 /// var httpClient = ClaudeCodeHttpClientFactory.Create();
@@ -26,7 +26,7 @@ public static class ClaudeCodeHttpClientFactory
 {
     /// <summary>
     /// Creates an <see cref="HttpClient"/> wired with <see cref="ClaudeCodeSessionHttpHandler"/>
-    /// using auto-resolved credentials (credentials file → environment variables).
+    /// using auto-resolved credentials (API key first, then optional local OAuth if enabled).
     /// </summary>
     public static HttpClient Create() => Create(configure: null);
 
@@ -34,7 +34,9 @@ public static class ClaudeCodeHttpClientFactory
     /// Creates an <see cref="HttpClient"/> authenticated with the supplied <paramref name="apiKey"/>.
     /// </summary>
     /// <param name="apiKey">
-    /// An Anthropic API key (<c>sk-ant-api*</c>) or OAuth token (<c>sk-ant-oat*</c>).
+    /// An Anthropic API key (<c>sk-ant-api*</c>).
+    /// OAuth tokens (<c>sk-ant-oat*</c>) require
+    /// <see cref="ClaudeCodeSessionOptions.EnableOAuthTokenSupport"/> and an interactive session.
     /// </param>
     public static HttpClient Create(string apiKey) =>
         Create(o => o.ApiKey = apiKey);

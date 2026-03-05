@@ -10,12 +10,23 @@ extension method call.
 
 ```csharp
 var kernel = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion()   // reads ~/.claude/.credentials.json automatically
+    .UseClaudeCodeChatCompletion(apiKey: "sk-ant-api...")
     .Build();
 ```
 
-No tokens to manage. No configuration files to maintain. If you are logged in to Claude Code
-locally (`claude login`), the package finds and validates your session automatically.
+For local interactive development, you can also enable Claude Code OAuth session support.
+
+---
+
+## Compliance-first defaults
+
+- API keys are the default path.
+- Claude Code OAuth support is disabled unless you explicitly set
+  `ClaudeSession:EnableOAuthTokenSupport=true`.
+- OAuth paths are restricted to interactive sessions and are not intended for unattended automation.
+- Reference terms:
+  [Consumer Terms](https://www.anthropic.com/legal/consumer-terms),
+  [Commercial Terms](https://www.anthropic.com/legal/commercial-terms).
 
 ---
 

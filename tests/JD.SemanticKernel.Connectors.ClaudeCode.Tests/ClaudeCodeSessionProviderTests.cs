@@ -30,10 +30,13 @@ public sealed class ClaudeCodeSessionProviderTests : IDisposable
     private static ClaudeCodeSessionProvider Build(Action<ClaudeCodeSessionOptions>? configure = null)
     {
         var options = new ClaudeCodeSessionOptions();
+        options.EnableOAuthTokenSupport = true;
         configure?.Invoke(options);
-        return new ClaudeCodeSessionProvider(
+        var provider = new ClaudeCodeSessionProvider(
             Options.Create(options),
             NullLogger<ClaudeCodeSessionProvider>.Instance);
+        provider.InteractiveSessionDetector = () => true;
+        return provider;
     }
 
     [Fact]
@@ -74,12 +77,11 @@ public sealed class ClaudeCodeSessionProviderTests : IDisposable
     }
 
     [Fact]
-    public async Task GetTokenAsync_ReturnsClaudeCodeOAuthTokenEnvVar_WhenApiKeyEnvVarAbsent()
+    public async Task GetTokenAsync_IgnoresClaudeCodeOAuthTokenEnvVar_WhenApiKeyEnvVarAbsent()
     {
         Environment.SetEnvironmentVariable("CLAUDE_CODE_OAUTH_TOKEN", "sk-ant-oat-from-env");
-        var provider = Build();
-        var token = await provider.GetTokenAsync();
-        Assert.Equal("sk-ant-oat-from-env", token);
+        var provider = Build(o => o.EnableOAuthTokenSupport = false);
+        await Assert.ThrowsAsync<ClaudeCodeSessionException>(() => provider.GetTokenAsync());
     }
 
     [Fact]
@@ -90,6 +92,27 @@ public sealed class ClaudeCodeSessionProviderTests : IDisposable
         var provider = Build();
         var token = await provider.GetTokenAsync();
         Assert.Equal("sk-ant-api-wins", token);
+    }
+
+    [Fact]
+    public async Task GetTokenAsync_OAuthDisabledByDefault_ThrowsForExplicitOAuthToken()
+    {
+        var provider = Build(o =>
+        {
+            o.EnableOAuthTokenSupport = false;
+            o.OAuthToken = "sk-ant-oat-test-token";
+        });
+
+        await Assert.ThrowsAsync<ClaudeCodeSessionException>(() => provider.GetTokenAsync());
+    }
+
+    [Fact]
+    public async Task GetTokenAsync_ThrowsForOAuthToken_WhenSessionIsNonInteractive()
+    {
+        var provider = Build(o => o.OAuthToken = "sk-ant-oat-test-token");
+        provider.InteractiveSessionDetector = () => false;
+
+        await Assert.ThrowsAsync<ClaudeCodeSessionException>(() => provider.GetTokenAsync());
     }
 
     [Fact]

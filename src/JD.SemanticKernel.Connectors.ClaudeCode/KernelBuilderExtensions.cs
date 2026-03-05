@@ -18,8 +18,8 @@ public static class KernelBuilderExtensions
 {
     /// <summary>
     /// Registers an Anthropic chat completion service backed by Claude Code session authentication.
-    /// Credentials are resolved automatically from <c>~/.claude/.credentials.json</c>,
-    /// environment variables, or the options delegate — in that priority order.
+    /// Credentials are resolved from API-key sources first, then optional local OAuth sources
+    /// when explicitly enabled for interactive use.
     /// </summary>
     /// <param name="builder">The kernel builder to configure.</param>
     /// <param name="modelId">
@@ -27,8 +27,9 @@ public static class KernelBuilderExtensions
     /// (<c>claude-sonnet-4-6</c>). See <see cref="ClaudeModels"/> for well-known identifiers.
     /// </param>
     /// <param name="apiKey">
-    /// Optional explicit API key or OAuth token override.  When supplied, credential file
-    /// and environment variable lookup is skipped.
+    /// Optional explicit API key override. OAuth tokens require
+    /// <see cref="ClaudeCodeSessionOptions.EnableOAuthTokenSupport"/> and an interactive session.
+    /// When supplied, credential file lookup is skipped.
     /// </param>
     /// <param name="configure">
     /// Optional delegate for fine-grained control over <see cref="ClaudeCodeSessionOptions"/>,
@@ -38,7 +39,7 @@ public static class KernelBuilderExtensions
     /// <returns>The same <paramref name="builder"/> for chaining.</returns>
     /// <example>
     /// <code>
-    /// // Minimal — reads from ~/.claude/.credentials.json
+    /// // Minimal — uses ANTHROPIC_API_KEY if available, otherwise local OAuth if enabled
     /// var kernel = Kernel.CreateBuilder()
     ///     .UseClaudeCodeChatCompletion()
     ///     .Build();

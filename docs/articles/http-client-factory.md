@@ -27,6 +27,8 @@ integration but still benefit from automatic Claude Code credential resolution.
 var httpClient = ClaudeCodeHttpClientFactory.Create();
 ```
 
+Default behavior prefers API keys (`ApiKey` / `ANTHROPIC_API_KEY`). OAuth requires explicit opt-in.
+
 ### Explicit API key
 
 ```csharp
@@ -38,7 +40,8 @@ var httpClient = ClaudeCodeHttpClientFactory.Create("sk-ant-api...");
 ```csharp
 var httpClient = ClaudeCodeHttpClientFactory.Create(o =>
 {
-    o.CredentialsPath = "/run/secrets/claude-credentials.json";
+    o.EnableOAuthTokenSupport = true;
+    o.CredentialsPath = "/custom/path/.credentials.json";
 });
 ```
 

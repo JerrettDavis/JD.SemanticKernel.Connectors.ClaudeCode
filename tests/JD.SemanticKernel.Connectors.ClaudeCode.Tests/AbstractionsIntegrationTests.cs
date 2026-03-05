@@ -33,9 +33,11 @@ public sealed class AbstractionsIntegrationTests : IDisposable
     {
         var options = new ClaudeCodeSessionOptions();
         configure?.Invoke(options);
-        return new ClaudeCodeSessionProvider(
+        var provider = new ClaudeCodeSessionProvider(
             Options.Create(options),
             NullLogger<ClaudeCodeSessionProvider>.Instance);
+        provider.InteractiveSessionDetector = () => true;
+        return provider;
     }
 
     // ── ISessionProvider ───────────────────────────────────────────
@@ -77,7 +79,11 @@ public sealed class AbstractionsIntegrationTests : IDisposable
         try
         {
             await File.WriteAllTextAsync(path, json);
-            ISessionProvider provider = Build(o => o.CredentialsPath = path);
+            ISessionProvider provider = Build(o =>
+            {
+                o.CredentialsPath = path;
+                o.EnableOAuthTokenSupport = true;
+            });
             var creds = await provider.GetCredentialsAsync();
 
             Assert.NotNull(creds);

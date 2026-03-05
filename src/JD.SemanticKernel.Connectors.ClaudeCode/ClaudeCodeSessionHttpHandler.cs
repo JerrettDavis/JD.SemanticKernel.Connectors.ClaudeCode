@@ -7,6 +7,11 @@ namespace JD.SemanticKernel.Connectors.ClaudeCode;
 /// outgoing HTTP request destined for the Anthropic API.
 ///
 /// <para>
+/// OAuth flows are validated by <see cref="ClaudeCodeSessionProvider"/> and are only available
+/// when explicitly enabled for local interactive use.
+/// </para>
+///
+/// <para>
 /// For OAuth tokens (<c>sk-ant-oat*</c>) it mimics the Claude Code CLI request signature so that
 /// <c>api.anthropic.com</c> accepts the Bearer token:
 /// <list type="bullet">

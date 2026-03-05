@@ -13,12 +13,19 @@ public sealed class ClaudeCodeSessionHttpHandlerTests
     private static ClaudeCodeSessionProvider ProviderWithToken(string token)
     {
         var options = token.Contains("sk-ant-oat")
-            ? new ClaudeCodeSessionOptions { OAuthToken = token }
+            ? new ClaudeCodeSessionOptions
+            {
+                OAuthToken = token,
+                EnableOAuthTokenSupport = true
+            }
             : new ClaudeCodeSessionOptions { ApiKey = token };
 
-        return new ClaudeCodeSessionProvider(
+        var provider = new ClaudeCodeSessionProvider(
             Options.Create(options),
             NullLogger<ClaudeCodeSessionProvider>.Instance);
+
+        provider.InteractiveSessionDetector = () => true;
+        return provider;
     }
 
     [Fact]

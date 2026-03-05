@@ -12,7 +12,7 @@ collection.
 
 ## Overloads
 
-### Auto-resolved session (no arguments)
+### Auto-resolved credentials (no arguments)
 
 ```csharp
 var kernel = Kernel.CreateBuilder()
@@ -59,16 +59,18 @@ Skips credential file and environment variable lookup entirely.
 
 ---
 
-### Explicit OAuth token override
+### Enable local OAuth support
 
 ```csharp
 var kernel = Kernel.CreateBuilder()
-    .UseClaudeCodeChatCompletion(apiKey: "sk-ant-oat...")
+    .UseClaudeCodeChatCompletion(configure: o =>
+    {
+        o.EnableOAuthTokenSupport = true;
+    })
     .Build();
 ```
 
-The handler detects the `sk-ant-oat` prefix and switches to Bearer + CLI header authentication
-automatically.
+OAuth support is disabled by default and only available in interactive sessions.
 
 ---
 
@@ -78,7 +80,8 @@ automatically.
 var kernel = Kernel.CreateBuilder()
     .UseClaudeCodeChatCompletion(configure: o =>
     {
-        o.CredentialsPath = "/run/secrets/claude-credentials.json";
+        o.EnableOAuthTokenSupport = true;
+        o.CredentialsPath = "/custom/path/.credentials.json";
     })
     .Build();
 ```
