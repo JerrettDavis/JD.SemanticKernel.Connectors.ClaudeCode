@@ -1,0 +1,96 @@
+name: Version Bump
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  version-bump:
+    # Skip when the triggering commit is itself a version bump (loop prevention)
+    if: "!startsWith(github.event.head_commit.message, 'chore(version):')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install NBGV
+        run: dotnet tool install -g nbgv
+
+      - name: Determine bump type from conventional commits
+        id: bump
+        shell: bash
+        run: |
+          # Analyze commits since the last version.json change
+          LAST_BUMP=$(git log --follow --format="%H" -- version.json | head -1)
+          if [ -n "$LAST_BUMP" ]; then
+            COMMITS=$(git log "${LAST_BUMP}..HEAD" --format="%B")
+          else
+            COMMITS=$(git log --format="%B")
+          fi
+
+          echo "Commits to analyze:"
+          echo "$COMMITS"
+
+          BUMP="none"
+          # Breaking changes → major (BREAKING CHANGE footer or ! after type)
+          if echo "$COMMITS" | grep -qE '(BREAKING CHANGE|^[a-z]+(\(.+\))?!:)'; then
+            BUMP="major"
+          # New features → minor
+          elif echo "$COMMITS" | grep -qE '^feat(\(.+\))?:'; then
+            BUMP="minor"
+          fi
+          # fix:/perf:/refactor: → no bump; NBGV commit height increments patch naturally
+
+          echo "bump=$BUMP" >> $GITHUB_OUTPUT
+          echo "Determined bump: $BUMP"
+
+      - name: Read current version
+        if: steps.bump.outputs.bump != 'none'
+        id: current
+        shell: bash
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('version.json'))['version'])")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version.json base: $VERSION"
+
+      - name: Compute new version
+        if: steps.bump.outputs.bump != 'none'
+        id: newver
+        shell: bash
+        run: |
+          CURRENT="${{ steps.current.outputs.version }}"
+          BUMP="${{ steps.bump.outputs.bump }}"
+          IFS='.' read -r MAJOR MINOR <<< "$CURRENT"
+          if [ "$BUMP" == "major" ]; then
+            MAJOR_NEW=$((MAJOR + 1))
+            NEW="${MAJOR_NEW}.0"
+          else
+            MINOR_NEW=$((MINOR + 1))
+            NEW="${MAJOR}.${MINOR_NEW}"
+          fi
+          echo "new=$NEW" >> $GITHUB_OUTPUT
+          echo "New version.json base: $NEW"
+
+      - name: Update version.json
+        if: steps.bump.outputs.bump != 'none'
+        shell: bash
+        run: nbgv set-version "${{ steps.newver.outputs.new }}"
+
+      - name: Commit and push
+        if: steps.bump.outputs.bump != 'none'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          git commit -m "chore(version): bump to ${{ steps.newver.outputs.new }} [${{ steps.bump.outputs.bump }}]"
+          git push origin main
