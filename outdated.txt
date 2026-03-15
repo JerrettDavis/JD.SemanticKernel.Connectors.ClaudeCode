@@ -1,0 +1,132 @@
+Discovering projects...
+Analyzing project(s)...
+Analyzing dependencies...
+» JD.SemanticKernel.Connectors.ClaudeCode
+  [net10.0]
+  Microsoft.Extensions.AI                                10.3.0 -> 10.4.0
+  Microsoft.Extensions.Configuration.Abstractions        10.0.3 -> 10.0.5
+  Microsoft.Extensions.DependencyInjection.Abstractions  10.0.3 -> 10.0.5
+  Microsoft.Extensions.Logging.Abstractions              10.0.3 -> 10.0.5
+  Microsoft.Extensions.Options                           10.0.3 -> 10.0.5
+  Microsoft.Extensions.Options.ConfigurationExtensions   10.0.3 -> 10.0.5
+  [net8.0]
+  Microsoft.Extensions.AI                                10.3.0 -> 10.4.0
+  Microsoft.Extensions.Configuration.Abstractions        10.0.3 -> 10.0.5
+  Microsoft.Extensions.DependencyInjection.Abstractions  10.0.3 -> 10.0.5
+  Microsoft.Extensions.Logging.Abstractions              10.0.3 -> 10.0.5
+  Microsoft.Extensions.Options                           10.0.3 -> 10.0.5
+  Microsoft.Extensions.Options.ConfigurationExtensions   10.0.3 -> 10.0.5
+  [.NETStandard,Version=v2.0]
+  Microsoft.Extensions.Configuration.Abstractions        10.0.3 -> 10.0.5
+  Microsoft.Extensions.DependencyInjection.Abstractions  10.0.3 -> 10.0.5
+  Microsoft.Extensions.Logging.Abstractions              10.0.3 -> 10.0.5
+  Microsoft.Extensions.Options                           10.0.3 -> 10.0.5
+  Microsoft.Extensions.Options.ConfigurationExtensions   10.0.3 -> 10.0.5
+  System.Text.Json                                       10.0.3 -> 10.0.5
+
+» JD.SemanticKernel.Connectors.ClaudeCode.Tests
+  [net10.0]
+  Microsoft.Extensions.Configuration  10.0.3 -> 10.0.5
+  Microsoft.Extensions.Logging        10.0.3 -> 10.0.5
+  [net8.0]
+  Microsoft.Extensions.Configuration  10.0.3 -> 10.0.5
+  Microsoft.Extensions.Logging        10.0.3 -> 10.0.5
+
+» JD.Tools.CodebaseExplorer
+  [net10.0]
+  Microsoft.Extensions.AI  10.3.0 -> 10.4.0
+  System.CommandLine       2.0.3  -> 2.0.5 
+  [net8.0]
+  Microsoft.Extensions.AI  10.3.0 -> 10.4.0
+  System.CommandLine       2.0.3  -> 2.0.5 
+
+» JD.Tools.GherkinGenerator
+  [net10.0]
+  Microsoft.Extensions.AI                10.3.0 -> 10.4.0
+  System.CommandLine                     2.0.3  -> 2.0.5 
+  System.Reflection.MetadataLoadContext  10.0.3 -> 10.0.5
+  [net8.0]
+  Microsoft.Extensions.AI                10.3.0 -> 10.4.0
+  System.CommandLine                     2.0.3  -> 2.0.5 
+  System.Reflection.MetadataLoadContext  10.0.3 -> 10.0.5
+
+» JD.Tools.PullRequestReviewer
+  [net10.0]
+  Microsoft.Extensions.AI  10.3.0 -> 10.4.0
+  System.CommandLine       2.0.3  -> 2.0.5 
+  [net8.0]
+  Microsoft.Extensions.AI  10.3.0 -> 10.4.0
+  System.CommandLine       2.0.3  -> 2.0.5 
+
+» TodoExtractor
+  [net10.0]
+  Microsoft.Extensions.AI  10.3.0 -> 10.4.0
+  [net8.0]
+  Microsoft.Extensions.AI  10.3.0 -> 10.4.0
+
+Version color legend:
+<red>   : Major version update or pre-release version. Possible breaking changes.
+<yellow>: Minor version update. Backwards-compatible features added.
+<green> : Patch version update. Backwards-compatible bug fixes.
+
+Upgrading package Microsoft.Extensions.AI...
+Project JD.SemanticKernel.Connectors.ClaudeCode [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [net8.0] upgraded successfully
+Project JD.Tools.CodebaseExplorer [net10.0] upgraded successfully
+Project JD.Tools.CodebaseExplorer [net8.0] upgraded successfully
+Project JD.Tools.GherkinGenerator [net10.0] upgraded successfully
+Project JD.Tools.GherkinGenerator [net8.0] upgraded successfully
+Project JD.Tools.PullRequestReviewer [net10.0] upgraded successfully
+Project JD.Tools.PullRequestReviewer [net8.0] upgraded successfully
+Project TodoExtractor [net10.0] upgraded successfully
+Project TodoExtractor [net8.0] upgraded successfully
+
+Upgrading package Microsoft.Extensions.Configuration.Abstractions...
+Project JD.SemanticKernel.Connectors.ClaudeCode [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [net8.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [.NETStandard,Version=v2.0] upgraded successfully
+
+Upgrading package Microsoft.Extensions.DependencyInjection.Abstractions...
+Project JD.SemanticKernel.Connectors.ClaudeCode [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [net8.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [.NETStandard,Version=v2.0] upgraded successfully
+
+Upgrading package Microsoft.Extensions.Logging.Abstractions...
+Project JD.SemanticKernel.Connectors.ClaudeCode [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [net8.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [.NETStandard,Version=v2.0] upgraded successfully
+
+Upgrading package Microsoft.Extensions.Options...
+Project JD.SemanticKernel.Connectors.ClaudeCode [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [net8.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [.NETStandard,Version=v2.0] upgraded successfully
+
+Upgrading package Microsoft.Extensions.Options.ConfigurationExtensions...
+Project JD.SemanticKernel.Connectors.ClaudeCode [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [net8.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode [.NETStandard,Version=v2.0] upgraded successfully
+
+Upgrading package System.Text.Json...
+Project JD.SemanticKernel.Connectors.ClaudeCode [.NETStandard,Version=v2.0] upgraded successfully
+
+Upgrading package Microsoft.Extensions.Configuration...
+Project JD.SemanticKernel.Connectors.ClaudeCode.Tests [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode.Tests [net8.0] upgraded successfully
+
+Upgrading package Microsoft.Extensions.Logging...
+Project JD.SemanticKernel.Connectors.ClaudeCode.Tests [net10.0] upgraded successfully
+Project JD.SemanticKernel.Connectors.ClaudeCode.Tests [net8.0] upgraded successfully
+
+Upgrading package System.CommandLine...
+Project JD.Tools.CodebaseExplorer [net10.0] upgraded successfully
+Project JD.Tools.CodebaseExplorer [net8.0] upgraded successfully
+Project JD.Tools.GherkinGenerator [net10.0] upgraded successfully
+Project JD.Tools.GherkinGenerator [net8.0] upgraded successfully
+Project JD.Tools.PullRequestReviewer [net10.0] upgraded successfully
+Project JD.Tools.PullRequestReviewer [net8.0] upgraded successfully
+
+Upgrading package System.Reflection.MetadataLoadContext...
+Project JD.Tools.GherkinGenerator [net10.0] upgraded successfully
+Project JD.Tools.GherkinGenerator [net8.0] upgraded successfully
+
+Elapsed: 00:01:30.0924890
