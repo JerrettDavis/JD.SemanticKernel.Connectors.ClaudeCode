@@ -28,7 +28,7 @@
   <!-- ─── Samples ─── -->
   <ItemGroup>
     <PackageVersion Include="Octokit" Version="14.0.0" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.3" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.5" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="10.0.5" />
   </ItemGroup>
 
