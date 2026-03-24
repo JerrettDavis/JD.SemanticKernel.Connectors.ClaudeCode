@@ -7,7 +7,7 @@
   <!-- ─── Build infrastructure (applied via Directory.Build.props) ─── -->
   <ItemGroup>
     <PackageVersion Include="Meziantou.Analyzer" Version="3.0.26" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
     <PackageVersion Include="Nerdbank.GitVersioning" Version="3.9.50" />
   </ItemGroup>
 
@@ -15,13 +15,13 @@
   <ItemGroup>
     <PackageVersion Include="Anthropic.SDK" Version="5.10.0" />
     <PackageVersion Include="JD.SemanticKernel.Connectors.Abstractions" Version="0.1.18" />
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.4.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.73.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.74.0" />
     <PackageVersion Include="System.Text.Json" Version="10.0.5" />
   </ItemGroup>
 
