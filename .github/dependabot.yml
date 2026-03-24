@@ -1,10 +1,10 @@
 version: 2
 
 updates:
-  - package-ecosystem: nuget
-    directory: /
+  - package-ecosystem: "nuget"
+    directory: "/"
     schedule:
-      interval: weekly
+      interval: "weekly"
       day: monday
       time: "09:00"
     open-pull-requests-limit: 10
@@ -17,39 +17,14 @@ updates:
       prefix: deps
       include: scope
     groups:
-      microsoft:
+      all-nuget:
         patterns:
-          - "Microsoft.*"
-        update-types:
-          - minor
-          - patch
-      semantic-kernel:
-        patterns:
-          - "Microsoft.SemanticKernel*"
-        update-types:
-          - minor
-          - patch
-      testing:
-        patterns:
-          - "xunit*"
-          - "Xunit.*"
-          - "coverlet.*"
-          - "FluentAssertions"
-        update-types:
-          - minor
-          - patch
-      analyzers:
-        patterns:
-          - "Meziantou.Analyzer"
-          - "Microsoft.CodeAnalysis.*"
-        update-types:
-          - minor
-          - patch
+          - "*"
 
-  - package-ecosystem: github-actions
-    directory: /
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: weekly
+      interval: "weekly"
       day: monday
       time: "09:00"
     open-pull-requests-limit: 5
@@ -61,3 +36,7 @@ updates:
     commit-message:
       prefix: ci
       include: scope
+    groups:
+      all-actions:
+        patterns:
+          - "*"
