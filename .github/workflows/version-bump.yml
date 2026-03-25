@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           # Analyze commits since the last version.json change
-          LAST_BUMP=$(git log --follow --format="%H" -- version.json | head -1)
+          LAST_BUMP=$(git rev-list --max-count=1 HEAD -- version.json)
           if [ -n "$LAST_BUMP" ]; then
             COMMITS=$(git log "${LAST_BUMP}..HEAD" --format="%B")
           else
