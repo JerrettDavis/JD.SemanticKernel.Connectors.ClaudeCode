@@ -42,10 +42,10 @@ jobs:
 
           BUMP="none"
           # Breaking changes → major (BREAKING CHANGE footer or ! after type)
-          if echo "$COMMITS" | grep -qE '(BREAKING CHANGE|^[a-z]+(\(.+\))?!:)'; then
+          if grep -qE '(BREAKING CHANGE|^[a-z]+(\(.+\))?!:)' <<< "$COMMITS"; then
             BUMP="major"
           # New features → minor
-          elif echo "$COMMITS" | grep -qE '^feat(\(.+\))?:'; then
+          elif grep -qE '^feat(\(.+\))?:' <<< "$COMMITS"; then
             BUMP="minor"
           fi
           # fix:/perf:/refactor: → no bump; NBGV commit height increments patch naturally
