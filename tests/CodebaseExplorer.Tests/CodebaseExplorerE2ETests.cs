@@ -445,27 +445,27 @@ public sealed class KernelWiringTests : IDisposable
             .ToList();
 
         Assert.Contains(
-            "FileSystem.get_directory_tree", functions);
+            "FileSystem.get_directory_tree", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "FileSystem.detect_project_files", functions);
+            "FileSystem.detect_project_files", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "FileSystem.read_file", functions);
+            "FileSystem.read_file", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "FileSystem.count_lines_by_extension", functions);
+            "FileSystem.count_lines_by_extension", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "FileSystem.search_files", functions);
+            "FileSystem.search_files", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "CodeAnalysis.analyze_dotnet_project", functions);
+            "CodeAnalysis.analyze_dotnet_project", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "CodeAnalysis.analyze_package_json", functions);
+            "CodeAnalysis.analyze_package_json", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "CodeAnalysis.find_entry_points", functions);
+            "CodeAnalysis.find_entry_points", functions, StringComparer.Ordinal);
         Assert.Contains(
             "KnowledgeBase.write_knowledgebase_document",
-            functions);
+            functions, StringComparer.Ordinal);
         Assert.Contains(
             "KnowledgeBase.get_knowledgebase_template",
-            functions);
+            functions, StringComparer.Ordinal);
     }
 }
 

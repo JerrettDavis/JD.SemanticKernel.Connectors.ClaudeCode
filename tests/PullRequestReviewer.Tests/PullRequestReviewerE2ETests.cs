@@ -336,21 +336,21 @@ public sealed class KernelWiringTests
             .ToList();
 
         Assert.Contains(
-            "Review.get_pr_summary", functions);
+            "Review.get_pr_summary", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "Review.list_changed_files", functions);
+            "Review.list_changed_files", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "Review.get_file_diff", functions);
+            "Review.get_file_diff", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "Review.add_review_comment", functions);
+            "Review.add_review_comment", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "Review.get_review_summary", functions);
+            "Review.get_review_summary", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "Review.get_analyzer_findings", functions);
+            "Review.get_analyzer_findings", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "Git.clone_repository", functions);
+            "Git.clone_repository", functions, StringComparer.Ordinal);
         Assert.Contains(
-            "Git.get_branch_diff", functions);
+            "Git.get_branch_diff", functions, StringComparer.Ordinal);
     }
 }
 
