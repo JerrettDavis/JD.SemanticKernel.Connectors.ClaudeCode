@@ -260,19 +260,19 @@ public sealed class KernelWiringTests
 
             Assert.Contains(
                 "StepScanner.scan_assembly_for_step_definitions",
-                functions);
+                functions, StringComparer.Ordinal);
             Assert.Contains(
-                "StepScanner.list_step_keywords", functions);
+                "StepScanner.list_step_keywords", functions, StringComparer.Ordinal);
             Assert.Contains(
-                "Features.list_feature_files", functions);
+                "Features.list_feature_files", functions, StringComparer.Ordinal);
             Assert.Contains(
-                "Features.read_feature_file", functions);
+                "Features.read_feature_file", functions, StringComparer.Ordinal);
             Assert.Contains(
-                "GherkinWriter.write_feature_file", functions);
+                "GherkinWriter.write_feature_file", functions, StringComparer.Ordinal);
             Assert.Contains(
-                "GherkinWriter.append_to_feature_file", functions);
+                "GherkinWriter.append_to_feature_file", functions, StringComparer.Ordinal);
             Assert.Contains(
-                "GherkinWriter.get_gherkin_template", functions);
+                "GherkinWriter.get_gherkin_template", functions, StringComparer.Ordinal);
         }
         finally
         {

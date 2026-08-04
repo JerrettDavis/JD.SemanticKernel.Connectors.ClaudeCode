@@ -23,9 +23,9 @@ public sealed class ClaudeModelDiscoveryTests
         var models = await discovery.DiscoverModelsAsync();
 
         var ids = models.Select(m => m.Id).ToList();
-        Assert.Contains(ClaudeModels.Opus, ids);
-        Assert.Contains(ClaudeModels.Sonnet, ids);
-        Assert.Contains(ClaudeModels.Haiku, ids);
+        Assert.Contains(ClaudeModels.Opus, ids, StringComparer.Ordinal);
+        Assert.Contains(ClaudeModels.Sonnet, ids, StringComparer.Ordinal);
+        Assert.Contains(ClaudeModels.Haiku, ids, StringComparer.Ordinal);
     }
 
     [Fact]
